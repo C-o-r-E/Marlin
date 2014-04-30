@@ -1609,6 +1609,7 @@ void process_commands()
         enable_e0();
         enable_e1();
         enable_e2();
+		enable_e3();
       break;
 
 #ifdef SDSUPPORT

@@ -663,6 +663,7 @@ block->steps_y = labs((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-positi
     enable_e0();
     enable_e1();
     enable_e2(); 
+	enable_e3();
   }
 
   if (block->steps_e == 0)
