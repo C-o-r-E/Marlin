@@ -83,9 +83,11 @@ U8GLIB_ST7920_128X64_RRD u8g(0);
 #elif defined(MAKRPANEL)
 // The MaKrPanel display, ST7565 controller as well
 U8GLIB_NHD_C12864 u8g(DOGLCD_CS, DOGLCD_A0);
-#elif defined(LM6063)
+#elif defined(LM6059)
 //U8GLIB_LM6063 u8g(DOGLCD_CS, DOGLCD_A0);
-U8GLIB_LM6063 u8g(35, 31, 33, 37);  //sck, mosi, cs, a0
+U8GLIB_LM6059 u8g(DOGLCD_CS, DOGLCD_A0);
+//U8GLIB_LM6059 u8g(35, 31, 33, 37);  //sck, mosi, cs, a0
+//U8GLIB_LM6063 u8g(35, 31, 33, 37);  //sck, mosi, cs, a0
 #else
 // for regular DOGM128 display with HW-SPI
 U8GLIB_DOGM128 u8g(DOGLCD_CS, DOGLCD_A0);	// HW-SPI Com: CS, A0
@@ -93,6 +95,7 @@ U8GLIB_DOGM128 u8g(DOGLCD_CS, DOGLCD_A0);	// HW-SPI Com: CS, A0
 
 static void lcd_implementation_init()
 {
+
 #ifdef LCD_PIN_BL
 	pinMode(LCD_PIN_BL, OUTPUT);	// Enable LCD backlight
 	digitalWrite(LCD_PIN_BL, HIGH);
@@ -144,6 +147,7 @@ static void lcd_implementation_init()
 			u8g.drawStr90(92,57,"8");
 			u8g.drawStr(100,61,"glib");
 	   } while( u8g.nextPage() );
+
 }
 
 static void lcd_implementation_clear()
@@ -175,6 +179,15 @@ static void lcd_implementation_status_screen()
 {
 
  static unsigned char fan_rot = 0;
+
+// SERIAL_ECHO_START;
+// SERIAL_ECHOLN("dogstatus");
+
+// SERIAL_ECHO("blink: ");
+// SERIAL_ECHOLN(blink);
+//
+// SERIAL_ECHO("fanspeed: ");
+// SERIAL_ECHOLN(fanSpeed);
  
  u8g.setColorIndex(1);	// black on white
  
@@ -205,7 +218,7 @@ static void lcd_implementation_status_screen()
  
  u8g.setPrintPos(80,47);
  if(starttime != 0)
-    {
+ {
         uint16_t time = millis()/60000 - starttime/60000;
 
 		u8g.print(itostr2(time/60));
@@ -215,8 +228,7 @@ static void lcd_implementation_status_screen()
 			lcd_printPGM(PSTR("--:--"));
 		 }
  #endif
- 
- // Extruder 1
+  // Extruder 1
  u8g.setFont(FONT_STATUSMENU);
  u8g.setPrintPos(6,6);
  u8g.print(itostr3(int(degTargetHotend(0) + 0.5)));

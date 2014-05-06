@@ -157,10 +157,10 @@
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
-#define HEATER_0_MAXTEMP 275
-#define HEATER_1_MAXTEMP 275
-#define HEATER_2_MAXTEMP 275
-#define HEATER_3_MAXTEMP 275
+#define HEATER_0_MAXTEMP 350
+#define HEATER_1_MAXTEMP 350
+#define HEATER_2_MAXTEMP 350
+#define HEATER_3_MAXTEMP 350
 #define BED_MAXTEMP 150
 
 // If your bed has low resistance e.g. .6 ohm and throws the fuse you can duty cycle it to reduce the
@@ -459,7 +459,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 //LCD and SD support
 #define ULTRA_LCD  //general LCD support, also 16x2
 #define DOGLCD  // Support for SPI LCD 128x64 (Controller ST7565R graphic Display Family)
-#define LM6063 // Adafruit version of ST7565
+#define LM6059 // Adafruit version of ST7565
 //#define SDSUPPORT // Enable SD Card Support in Hardware Console
 //#define SDSLOW // Use slower SD transfer mode (not normally needed - uncomment if you're getting volume init error)
 //#define ENCODER_PULSES_PER_STEP 1 // Increase if you have a high resolution encoder
@@ -608,9 +608,11 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
   #endif
 #else //no panel but just LCD
   #ifdef ULTRA_LCD
-  #ifdef LM6059
+  #ifdef LM6063
     #define LCD_WIDTH 128
     #define LCD_HEIGHT 64
+//    #define LCD_SCREEN_ROT_180
+    #define DEFAULT_LCD_CONTRAST 128
   #elif defined(DOGLCD) // Change number of lines to match the 128x64 graphics display
     #define LCD_WIDTH 20
     #define LCD_HEIGHT 5

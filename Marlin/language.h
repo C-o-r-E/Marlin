@@ -24,7 +24,10 @@
 
 #define PROTOCOL_VERSION "1.0"
 
-#if MOTHERBOARD == 7 || MOTHERBOARD == 71 || MOTHERBOARD == 72
+#if MOTHERBOARD == 390
+	#define MACHINE_NAME "SolidXpress"
+	#define FIRMWARE_URL "http://solidxpress.com"
+#elif MOTHERBOARD == 7 || MOTHERBOARD == 71 || MOTHERBOARD == 72
 	#define MACHINE_NAME "Ultimaker"
 	#define FIRMWARE_URL "http://firmware.ultimaker.com"
 #elif MOTHERBOARD == 80

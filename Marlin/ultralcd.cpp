@@ -1042,6 +1042,10 @@ void lcd_init()
 
 void lcd_update()
 {
+	//SERIAL_ECHO_START;
+	//SERIAL_ECHOLN("lcd update ");
+
+
     static unsigned long timeoutToStatus = 0;
 
     #ifdef LCD_HAS_SLOW_BUTTONS
@@ -1112,6 +1116,7 @@ void lcd_update()
         u8g.firstPage();
         do
         {
+			//SERIAL_ECHOLN("-->Dog");
             u8g.setFont(u8g_font_6x10_marlin);
             u8g.setPrintPos(125,0);
             if (blink % 2) u8g.setColorIndex(1); else u8g.setColorIndex(0); // Set color for the alive dot

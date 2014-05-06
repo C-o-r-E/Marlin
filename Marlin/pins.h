@@ -13,80 +13,6 @@
 #define E1_MS2_PIN -1
 #define DIGIPOTSS_PIN -1
 
-#if MOTHERBOARD == 390
-#define KNOWN_BOARD 1
-
-#define X_STEP_PIN          54
-#define X_DIR_PIN           55
-#define X_ENABLE_PIN        38
-#define X_MIN_PIN	    3
-#define X_MAX_PIN	    2
-//#define X_STOP_PIN          2
-
-#define Y_STEP_PIN          60
-#define Y_DIR_PIN           61
-#define Y_ENABLE_PIN        56
-//#define Y_STOP_PIN          15
-#define Y_MAX_PIN	    15
-#define Y_MIN_PIN           14
-
-#define Z_STEP_PIN          46
-#define Z_DIR_PIN           48
-#define Z_ENABLE_PIN        62
-//#define Z_STOP_PIN          19
-#define Z_MAX_PIN	    19
-#define Z_MIN_PIN           18
-
-#define E0_STEP_PIN         26
-#define E0_DIR_PIN          28
-#define E0_ENABLE_PIN       24
-
-#define E1_STEP_PIN         36
-#define E1_DIR_PIN          34
-#define E1_ENABLE_PIN       30
-
-#define E2_STEP_PIN         42
-#define E2_DIR_PIN          43
-#define E2_ENABLE_PIN       41
-
-#define E3_STEP_PIN         45
-#define E3_DIR_PIN          47
-#define E3_ENABLE_PIN       44
-
-#define SDPOWER            -1
-#define SDSS               -1
-#define LED_PIN            13
-#define FAN_PIN            -1
-#define PS_ON_PIN          -1
-#define KILL_PIN           -1
-
-#define HEATER_0_PIN        12
-#define HEATER_1_PIN        11
-#define HEATER_2_PIN        10
-#define HEATER_3_PIN        9
-#define TEMP_0_PIN          10   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-#define TEMP_1_PIN          11   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-#define TEMP_2_PIN          12   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-#define TEMP_3_PIN          13   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-#define TEMP_BED_PIN        5    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-#define HEATER_BED_PIN      8
-
-
-#define DOGLCD_A0  49
-#define DOGLCD_CS  53
-
-#define BEEPER -1
-
-//#define LCD_CONTRAST 6
-/*
-s0 == pin22
-s1 == pin39
-s2 == pin40
-s3 == pin7 
-*/
-
-#endif /* 390 */
-
 #if MOTHERBOARD == 99
 #define KNOWN_BOARD 1
 
@@ -2585,6 +2511,82 @@ s3 == pin7
  #define encrot3 1
 
 #endif
+
+
+#if MOTHERBOARD == 390
+#define KNOWN_BOARD 1
+
+#define X_STEP_PIN          54
+#define X_DIR_PIN           55
+#define X_ENABLE_PIN        38
+#define X_MIN_PIN	    3
+#define X_MAX_PIN	    2
+//#define X_STOP_PIN          2
+
+#define Y_STEP_PIN          60
+#define Y_DIR_PIN           61
+#define Y_ENABLE_PIN        56
+//#define Y_STOP_PIN          15
+#define Y_MAX_PIN	    15
+#define Y_MIN_PIN           14
+
+#define Z_STEP_PIN          46
+#define Z_DIR_PIN           48
+#define Z_ENABLE_PIN        62
+//#define Z_STOP_PIN          19
+#define Z_MAX_PIN	    19
+#define Z_MIN_PIN           18
+
+#define E0_STEP_PIN         26
+#define E0_DIR_PIN          28
+#define E0_ENABLE_PIN       24
+
+#define E1_STEP_PIN         36
+#define E1_DIR_PIN          34
+#define E1_ENABLE_PIN       30
+
+#define E2_STEP_PIN         42
+#define E2_DIR_PIN          43
+#define E2_ENABLE_PIN       41
+
+#define E3_STEP_PIN         45
+#define E3_DIR_PIN          47
+#define E3_ENABLE_PIN       44
+
+#define SDPOWER            -1
+#define SDSS               -1
+#define LED_PIN            13
+#define FAN_PIN            5
+#define PS_ON_PIN          -1
+#define KILL_PIN           -1
+
+#define HEATER_0_PIN        12
+#define HEATER_1_PIN        11
+#define HEATER_2_PIN        10
+#define HEATER_3_PIN        9
+#define TEMP_0_PIN          10   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define TEMP_1_PIN          11   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define TEMP_2_PIN          12   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define TEMP_3_PIN          13   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define TEMP_BED_PIN        5    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define HEATER_BED_PIN      8
+
+
+#define DOGLCD_A0  49
+#define DOGLCD_CS  53
+
+#define BEEPER -1
+
+//#define LCD_CONTRAST 6
+/*
+s0 == pin22
+s1 == pin39
+s2 == pin40
+s3 == pin7 
+*/
+
+#endif /* 390 */
+
 
 
 
