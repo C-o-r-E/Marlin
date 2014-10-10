@@ -413,7 +413,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
 // default settings
 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {173.91, 80, 1066.67, 760*1.1}
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {173.91, 80, 1066.67, 490}
 //{35.83, 128, 1600, 760*1.1}  // default steps per unit for Ultimaker//
 //{78.7402,78.7402,200.0*8/3,760*1.1}  // default steps per unit for Ultimaker
 #define DEFAULT_MAX_FEEDRATE          {500, 500, 5, 25}    // (mm/sec)
