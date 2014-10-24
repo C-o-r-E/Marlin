@@ -2,8 +2,8 @@
 #define ULTRA_LCD_IMPLEMENTATION_HITACHI_HD44780_H
 
 /**
-* Implementation of the LCD display routines for a hitachi HD44780 display. These are common LCD character displays.
-* When selecting the rusian language, a slightly different LCD implementation is used to handle UTF8 characters.
+* Implementation of the LCD display routines for a Hitachi HD44780 display. These are common LCD character displays.
+* When selecting the Russian language, a slightly different LCD implementation is used to handle UTF8 characters.
 **/
 
 #ifndef REPRAPWORLD_KEYPAD
@@ -20,7 +20,7 @@ extern volatile uint16_t buttons;  //an extended version of the last checked but
 // via a shift/i2c register.
 
 #ifdef ULTIPANEL
-// All Ultipanels might have an encoder - so this is always be mapped onto first two bits
+// All UltiPanels might have an encoder - so this is always be mapped onto first two bits
 #define BLEN_B 1
 #define BLEN_A 0
 
@@ -297,7 +297,7 @@ static void lcd_implementation_init()
         B00000
     }; //thanks Sonny Mounicou
 
-#if defined(LCDI2C_TYPE_PCF8575)
+#if defined(LCD_I2C_TYPE_PCF8575)
     lcd.begin(LCD_WIDTH, LCD_HEIGHT);
   #ifdef LCD_I2C_PIN_BL
     lcd.setBacklightPin(LCD_I2C_PIN_BL,POSITIVE);
@@ -467,7 +467,7 @@ static void lcd_implementation_status_screen()
 # endif//LCD_WIDTH > 19
     lcd.setCursor(LCD_WIDTH - 8, 1);
     lcd.print('Z');
-    lcd.print(ftostr32(current_position[Z_AXIS]));
+    lcd.print(ftostr32(current_position[Z_AXIS] + 0.00001));
 #endif//LCD_HEIGHT > 2
 
 #if LCD_HEIGHT > 3
