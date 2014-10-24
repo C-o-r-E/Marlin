@@ -1172,6 +1172,32 @@ void process_commands()
       }
       break;
       #endif //FWRETRACT
+
+	case 27: // Move to bottom
+
+		destination[Z_AXIS] = Z_MAX_LENGTH;
+		feedrate = max_feedrate[Z_AXIS];
+		
+		plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+		plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate, active_extruder);
+		st_synchronize();
+		current_position[Z_AXIS] = destination[Z_AXIS];
+
+/*
+		saved_feedrate = feedrate;
+		saved_feedmultiply = feedmultiply;
+		feedmultiply = 100;
+		previous_millis_cmd = millis();
+
+		HOMEAXIS(Z);
+
+		feedrate = saved_feedrate;
+		feedmultiply = saved_feedmultiply;
+		previous_millis_cmd = millis();
+		endstops_hit_on_purpose();
+*/
+		break;
+
     case 28: //G28 Home all Axis one at a time
 #ifdef ENABLE_AUTO_BED_LEVELING
       plan_bed_level_matrix.set_to_identity();  //Reset the plane ("erase" all leveling data)
@@ -1311,6 +1337,24 @@ void process_commands()
               plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate, active_extruder);
               st_synchronize();
             #endif
+
+			  #ifdef FBLB_Z_SAFE_HOMING
+			    destination[X_AXIS] = round(FBLB_Z_SAFE_HOMING_X_POINT);
+				destination[Y_AXIS] = round(FBLB_Z_SAFE_HOMING_Y_POINT);
+				//destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+				//feedrate = homing_feedrate[Y_AXIS];
+				feedrate = homing_feedrate[X_AXIS];
+				if(homing_feedrate[Y_AXIS]<feedrate)
+					feedrate = homing_feedrate[Y_AXIS];
+				//current_position[Z_AXIS] = 0;
+				
+				plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+				plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60, active_extruder);
+				st_synchronize();
+				current_position[X_AXIS] = destination[X_AXIS];
+				current_position[Y_AXIS] = destination[Y_AXIS];
+			  #endif
+
             HOMEAXIS(Z);
           }
         #else                      // Z Safe mode activated.
