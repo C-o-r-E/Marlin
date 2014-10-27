@@ -2627,6 +2627,17 @@ Sigma_Exit:
       #endif //HEATER_2_PIN
     #endif
 
+//fblb
+	  case 380:
+		  SET_OUTPUT(SOL_ON_PIN);
+		  WRITE(SOL_ON_PIN,HIGH);
+		  break;
+
+	  case 381:
+		  SET_OUTPUT(SOL_ON_PIN);
+		  WRITE(SOL_ON_PIN,LOW);
+		  break;
+
     #if defined(PS_ON_PIN) && PS_ON_PIN > -1
       case 80: // M80 - Turn on Power Supply
         SET_OUTPUT(PS_ON_PIN); //GND
@@ -2647,7 +2658,7 @@ Sigma_Exit:
         #endif
         break;
       #endif
-
+			
       case 81: // M81 - Turn off Power Supply
         disable_heater();
         st_synchronize();
