@@ -207,6 +207,9 @@ void refresh_cmd_timeout(void);
 void setPwmFrequency(uint8_t pin, int val);
 #endif
 
+void enable_solenoid_on_active_extruder();
+void disable_all_solenoids();
+
 #ifndef CRITICAL_SECTION_START
   #define CRITICAL_SECTION_START  unsigned char _sreg = SREG; cli();
   #define CRITICAL_SECTION_END    SREG = _sreg;

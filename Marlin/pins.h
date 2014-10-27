@@ -2875,7 +2875,10 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
 
-#define SOL_ON_PIN 22
+#define SOL0_PIN 22
+#define SOL1_PIN 39
+#define SOL2_PIN 40
+#define SOL3_PIN 7
 
 #define HEATER_0_PIN        12
 #define HEATER_1_PIN        11

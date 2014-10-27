@@ -2628,15 +2628,18 @@ Sigma_Exit:
     #endif
 
 //fblb
-	  case 380:
-		  SET_OUTPUT(SOL_ON_PIN);
-		  WRITE(SOL_ON_PIN,HIGH);
+
+#ifdef USE_SOLENOIDS
+
+	case 380: // Active extruder's solenoid on
+		enable_solenoid_on_active_extruder();
 		  break;
 
-	  case 381:
-		  SET_OUTPUT(SOL_ON_PIN);
-		  WRITE(SOL_ON_PIN,LOW);
+	case 381: // Disable all solenoids
+		disable_all_solenoids();
 		  break;
+
+#endif // USE_SOLENOIDS
 
     #if defined(PS_ON_PIN) && PS_ON_PIN > -1
       case 80: // M80 - Turn on Power Supply
@@ -3841,7 +3844,7 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
                      extruder_offset[Z_AXIS][tmp_extruder];
 
         active_extruder = tmp_extruder;
-
+		
         // This function resets the max/min values - the current position may be overwritten below.
         axis_is_at_home(X_AXIS);
 
@@ -3894,7 +3897,14 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
            prepare_move();
         }
       }
-      #endif
+
+#ifdef USE_SOLENOIDS
+		disable_all_solenoids();
+		enable_solenoid_on_active_extruder();
+#endif //USE_SOLENOIDS
+
+
+#endif // extruders > 1
       SERIAL_ECHO_START;
       SERIAL_ECHO(MSG_ACTIVE_EXTRUDER);
       SERIAL_PROTOCOLLN((int)active_extruder);
@@ -4534,3 +4544,40 @@ bool setTargetedHotend(int code){
   return false;
 }
 
+void enable_solenoid_on_active_extruder(){
+	  if(active_extruder == 0){
+	  SET_OUTPUT(SOL0_PIN);
+	  WRITE(SOL0_PIN,HIGH);
+  }
+	  
+	  if(active_extruder == 1){
+	  SET_OUTPUT(SOL1_PIN);
+	  WRITE(SOL1_PIN,HIGH);
+  }
+	  
+	  if(active_extruder == 2){
+	  SET_OUTPUT(SOL2_PIN);
+	  WRITE(SOL2_PIN,HIGH);
+  }
+	  
+	  if(active_extruder == 3){
+	  SET_OUTPUT(SOL3_PIN);
+	  WRITE(SOL3_PIN,HIGH);
+	}
+
+	  return;
+  }
+
+void disable_all_solenoids(){
+	  SET_OUTPUT(SOL0_PIN);
+	  SET_OUTPUT(SOL1_PIN);
+	  SET_OUTPUT(SOL2_PIN);
+	  SET_OUTPUT(SOL3_PIN);
+	  
+	  WRITE(SOL0_PIN,LOW);
+	  WRITE(SOL1_PIN,LOW);
+	  WRITE(SOL2_PIN,LOW);
+	  WRITE(SOL3_PIN,LOW);
+
+	  return;
+  }

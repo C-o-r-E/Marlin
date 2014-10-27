@@ -494,6 +494,22 @@ void manage_heater()
       soft_pwm[e] = 0;
     }
 
+	//corey debug
+/*	SERIAL_ECHO_START;
+	SERIAL_ECHO(" PID_DEBUG ");
+    SERIAL_ECHO(e);
+	SERIAL_ECHO(" current ");
+	SERIAL_ECHO(current_temperature[e]);
+ 	SERIAL_ECHO(" min ");
+	SERIAL_ECHO(minttemp[e]);
+	SERIAL_ECHO(" max ");
+	SERIAL_ECHO(maxttemp[e]);
+	SERIAL_ECHO(" soft_pwm ");
+	SERIAL_ECHOLN((int)soft_pwm[e]);
+*/
+
+
+
     #ifdef WATCH_TEMP_PERIOD
     if(watchmillis[e] && millis() - watchmillis[e] > WATCH_TEMP_PERIOD)
     {
