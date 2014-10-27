@@ -2560,6 +2560,8 @@
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
 
+#define SOL_ON_PIN 22
+
 #define HEATER_0_PIN        12
 #define HEATER_1_PIN        11
 #define HEATER_2_PIN        10
