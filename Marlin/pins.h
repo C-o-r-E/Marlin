@@ -2880,10 +2880,14 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
 #define SOL2_PIN 40
 #define SOL3_PIN 7
 
+//temporary fix -> swap heater1 and heater3 pins
+#define HEATER_1_PIN        9
+#define HEATER_3_PIN        11
+
 #define HEATER_0_PIN        12
-#define HEATER_1_PIN        11
+//#define HEATER_1_PIN        11
 #define HEATER_2_PIN        10
-#define HEATER_3_PIN        9
+//#define HEATER_3_PIN        9
 #define TEMP_0_PIN          10   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
 #define TEMP_1_PIN          11   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
 #define TEMP_2_PIN          12   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!

@@ -244,9 +244,17 @@ float zprobe_zoffset;
 #else
   #define NUM_EXTRUDER_OFFSETS 3 // supports offsets in XYZ plane
 #endif
+
+#ifdef Z_OFFSETS
+  #define NUM_EXTRUDER_OFFSETS 3 // supports offsets in XYZ plane
+#endif
+
 float extruder_offset[NUM_EXTRUDER_OFFSETS][EXTRUDERS] = {
 #if defined(EXTRUDER_OFFSET_X) && defined(EXTRUDER_OFFSET_Y)
   EXTRUDER_OFFSET_X, EXTRUDER_OFFSET_Y
+#endif
+#ifdef Z_OFFSETS
+  , EXTRUDER_OFFSET_Z
 #endif
 };
 #endif
@@ -1593,6 +1601,7 @@ void process_commands()
             #endif
 
 			  #ifdef FBLB_Z_SAFE_HOMING
+			    disable_all_solenoids();
 			    destination[X_AXIS] = round(FBLB_Z_SAFE_HOMING_X_POINT);
 				destination[Y_AXIS] = round(FBLB_Z_SAFE_HOMING_Y_POINT);
 				//destination[Z_AXIS] = Z_RAISE_BEFORE_HOMING * home_dir(Z_AXIS) * (-1);    // Set destination away from bed
