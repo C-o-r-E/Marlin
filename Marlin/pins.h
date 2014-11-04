@@ -2849,8 +2849,9 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
 #define Z_ENABLE_PIN        62
 //#define Z_STOP_PIN          19
 #define Z_MAX_PIN	        19
-#define Z_MIN_PIN           37
-#define Z_CRIT_PIN          18
+//#define Z_MIN_PIN           37
+#define Z_MIN_PIN           18
+//#define Z_CRIT_PIN          18
 
 #define E0_STEP_PIN         26
 #define E0_DIR_PIN          28
@@ -2875,24 +2876,33 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
 
-#define SOL0_PIN 22
-#define SOL1_PIN 39
+ // temp ramps
+#define SOL0_PIN 42
+#define SOL1_PIN 44
+
+//#define SOL0_PIN 22
+//#define SOL1_PIN 39
 #define SOL2_PIN 40
 #define SOL3_PIN 7
 
 //temporary fix -> swap heater1 and heater3 pins
-#define HEATER_1_PIN        9
-#define HEATER_3_PIN        11
+//#define HEATER_1_PIN        9
+//#define HEATER_3_PIN        11
 
-#define HEATER_0_PIN        12
+ // temp ramps
+#define HEATER_0_PIN        9
+#define HEATER_1_PIN        10
+
+//#define HEATER_0_PIN        12
 //#define HEATER_1_PIN        11
-#define HEATER_2_PIN        10
+//#define HEATER_2_PIN        10
 //#define HEATER_3_PIN        9
 #define TEMP_0_PIN          10   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
 #define TEMP_1_PIN          11   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
 #define TEMP_2_PIN          12   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
 #define TEMP_3_PIN          13   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
-#define TEMP_BED_PIN        5    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+#define TEMP_BED_PIN        9    // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!!
+
 #define HEATER_BED_PIN      8
 
 

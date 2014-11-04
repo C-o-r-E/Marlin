@@ -3908,6 +3908,7 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
       }
 
 #ifdef USE_SOLENOIDS
+	    st_synchronize();
 		disable_all_solenoids();
 		enable_solenoid_on_active_extruder();
 #endif //USE_SOLENOIDS
