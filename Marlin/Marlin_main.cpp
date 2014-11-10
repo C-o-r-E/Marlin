@@ -75,11 +75,14 @@
 // G4  - Dwell S<seconds> or P<milliseconds>
 // G10 - retract filament according to settings of M207
 // G11 - retract recover filament according to settings of M208
+// G27 - Move to bottom
 // G28 - Home all Axis
 // G29 - Detailed Z-Probe, probes the bed at 3 or more points.  Will fail if you haven't homed yet.
 // G30 - Single Z Probe, probes bed at current XY location.
 // G31 - Dock sled (Z_PROBE_SLED only)
 // G32 - Undock sled (Z_PROBE_SLED only)
+// G33 - Clean extruder
+// G34 - Purge and clean extruder
 // G90 - Use Absolute Coordinates
 // G91 - Use Relative Coordinates
 // G92 - Set current position to coordinates given
@@ -228,6 +231,8 @@ float volumetric_multiplier[EXTRUDERS] = {1.0
 };
 float current_position[NUM_AXIS] = { 0.0, 0.0, 0.0, 0.0 };
 float add_homing[3]={0,0,0};
+float clean_start[2][2]={CLEAN_START0, CLEAN_START1};
+float clean_end[2][2]={CLEAN_END0, CLEAN_END1};
 #ifdef DELTA
 float endstop_adj[3]={0,0,0};
 #endif
@@ -1876,7 +1881,67 @@ void process_commands()
         dock_sled(false);
         break;
 #endif // Z_PROBE_SLED
+
+
 #endif // ENABLE_AUTO_BED_LEVELING
+
+	case 33: // Clean extruder
+	{
+		float oldx = 0.0;
+		float oldy = 0.0;
+
+      codenum = 0;
+      if(code_seen('P')) codenum = code_value(); // the extruder to clean
+
+      SERIAL_ECHO_START;
+      SERIAL_ECHOLN("G33 start");
+
+	  disable_all_solenoids();
+	  st_synchronize();
+
+	  oldx = current_position[X_AXIS];
+	  oldy = current_position[Y_AXIS];
+	  
+	  feedrate = homing_feedrate[X_AXIS];
+	  if(homing_feedrate[Y_AXIS]<feedrate)
+		  feedrate = homing_feedrate[Y_AXIS];
+
+	  SERIAL_ECHO("feedrate = ");
+	  SERIAL_ECHOLN(feedrate);
+	  SERIAL_ECHO("Move to ");
+	  SERIAL_ECHO(clean_start[codenum][X_AXIS]);
+	  SERIAL_ECHO(", ");
+	  SERIAL_ECHOLN(clean_start[codenum][Y_AXIS]);
+//move to start
+	  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+	  plan_buffer_line(clean_start[codenum][X_AXIS], clean_start[codenum][Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
+	  st_synchronize();
+	  current_position[X_AXIS] = clean_start[codenum][X_AXIS];
+	  current_position[Y_AXIS] = clean_start[codenum][Y_AXIS];
+
+//move to end
+	  enable_solenoid(codenum);
+	  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+	  plan_buffer_line(clean_end[codenum][X_AXIS], clean_end[codenum][Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
+	  st_synchronize();
+	  current_position[X_AXIS] = clean_end[codenum][X_AXIS];
+	  current_position[Y_AXIS] = clean_end[codenum][Y_AXIS];
+
+//move back
+	  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+	  plan_buffer_line(oldx, oldy, current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
+	  st_synchronize();
+	  current_position[X_AXIS] = oldx;
+	  current_position[Y_AXIS] = oldy;
+	  disable_all_solenoids();
+	  enable_solenoid_on_active_extruder();
+
+		break;
+	}	
+	case 34: // Purge and clean extruder
+		break;
+
+
     case 90: // G90
       relative_mode = false;
       break;
@@ -4554,28 +4619,34 @@ bool setTargetedHotend(int code){
   return false;
 }
 
-void enable_solenoid_on_active_extruder(){
-	  if(active_extruder == 0){
-	  SET_OUTPUT(SOL0_PIN);
-	  WRITE(SOL0_PIN,HIGH);
-  }
-	  
-	  if(active_extruder == 1){
-	  SET_OUTPUT(SOL1_PIN);
-	  WRITE(SOL1_PIN,HIGH);
-  }
-	  
-	  if(active_extruder == 2){
-	  SET_OUTPUT(SOL2_PIN);
-	  WRITE(SOL2_PIN,HIGH);
-  }
-	  
-	  if(active_extruder == 3){
-	  SET_OUTPUT(SOL3_PIN);
-	  WRITE(SOL3_PIN,HIGH);
+void enable_solenoid(uint8_t num)
+{
+		if(num == 0){
+		SET_OUTPUT(SOL0_PIN);
+		WRITE(SOL0_PIN,HIGH);
 	}
+		
+		if(num == 1){
+		SET_OUTPUT(SOL1_PIN);
+		WRITE(SOL1_PIN,HIGH);
+	}
+		
+		if(num == 2){
+		SET_OUTPUT(SOL2_PIN);
+		WRITE(SOL2_PIN,HIGH);
+	}
+		
+		if(num == 3){
+		SET_OUTPUT(SOL3_PIN);
+		WRITE(SOL3_PIN,HIGH);
+	}
+		
+		return;
+}
 
-	  return;
+void enable_solenoid_on_active_extruder(){
+		enable_solenoid(active_extruder);
+		return;
   }
 
 void disable_all_solenoids(){
