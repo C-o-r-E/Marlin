@@ -211,6 +211,12 @@ void enable_solenoid_on_active_extruder();
 void enable_solenoid(uint8_t num);
 void disable_all_solenoids();
 
+void do_dwell(unsigned long ms);
+void do_clean_start(unsigned long ext);
+void do_clean_end(unsigned long ext);
+void do_cleaning(unsigned long ext, bool purge);
+void do_purge(float purge_speed, float purge_distance, unsigned long ext);
+
 #ifndef CRITICAL_SECTION_START
   #define CRITICAL_SECTION_START  unsigned char _sreg = SREG; cli();
   #define CRITICAL_SECTION_END    SREG = _sreg;

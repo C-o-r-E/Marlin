@@ -1884,63 +1884,21 @@ void process_commands()
 
 
 #endif // ENABLE_AUTO_BED_LEVELING
-
-	case 33: // Clean extruder
-	{
-		float oldx = 0.0;
-		float oldy = 0.0;
-
-      codenum = 0;
-      if(code_seen('P')) codenum = code_value(); // the extruder to clean
-
-      SERIAL_ECHO_START;
-      SERIAL_ECHOLN("G33 start");
-
-	  disable_all_solenoids();
-	  st_synchronize();
-
-	  oldx = current_position[X_AXIS];
-	  oldy = current_position[Y_AXIS];
-	  
-	  feedrate = homing_feedrate[X_AXIS];
-	  if(homing_feedrate[Y_AXIS]<feedrate)
-		  feedrate = homing_feedrate[Y_AXIS];
-
-	  SERIAL_ECHO("feedrate = ");
-	  SERIAL_ECHOLN(feedrate);
-	  SERIAL_ECHO("Move to ");
-	  SERIAL_ECHO(clean_start[codenum][X_AXIS]);
-	  SERIAL_ECHO(", ");
-	  SERIAL_ECHOLN(clean_start[codenum][Y_AXIS]);
-//move to start
-	  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
-	  plan_buffer_line(clean_start[codenum][X_AXIS], clean_start[codenum][Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
-	  st_synchronize();
-	  current_position[X_AXIS] = clean_start[codenum][X_AXIS];
-	  current_position[Y_AXIS] = clean_start[codenum][Y_AXIS];
-
-//move to end
-	  enable_solenoid(codenum);
-	  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
-	  plan_buffer_line(clean_end[codenum][X_AXIS], clean_end[codenum][Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
-	  st_synchronize();
-	  current_position[X_AXIS] = clean_end[codenum][X_AXIS];
-	  current_position[Y_AXIS] = clean_end[codenum][Y_AXIS];
-
-//move back
-	  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
-	  plan_buffer_line(oldx, oldy, current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
-	  st_synchronize();
-	  current_position[X_AXIS] = oldx;
-	  current_position[Y_AXIS] = oldy;
-	  disable_all_solenoids();
-	  enable_solenoid_on_active_extruder();
-
-		break;
-	}	
-	case 34: // Purge and clean extruder
-		break;
-
+		
+		  case 33: // Clean extruder
+		  {
+			  if(code_seen('P')) codenum = code_value(); // milliseconds to wait
+			  do_cleaning(codenum, false);
+			
+		  }	
+		  break;
+		  case 34: // Purge and clean extruder
+		  {
+			  if(code_seen('P')) codenum = code_value(); // milliseconds to wait
+			  do_cleaning(codenum, true);
+			  
+		  }
+		  break;
 
     case 90: // G90
       relative_mode = false;
@@ -4662,3 +4620,93 @@ void disable_all_solenoids(){
 
 	  return;
   }
+
+void do_dwell(unsigned long ms){
+	  
+      ms += millis();  // keep track of when we started waiting
+      while( millis()  < ms ){
+	      manage_heater();
+		  manage_inactivity();
+		  lcd_update();
+      }
+	  
+}
+
+void do_clean_start(unsigned long ext){
+
+	  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+	  plan_buffer_line(clean_start[ext][X_AXIS], clean_start[ext][Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
+	  st_synchronize();
+	  current_position[X_AXIS] = clean_start[ext][X_AXIS];
+	  current_position[Y_AXIS] = clean_start[ext][Y_AXIS];
+	  
+}
+
+void do_clean_end(unsigned long ext){
+
+	  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+	  plan_buffer_line(clean_end[ext][X_AXIS], clean_end[ext][Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
+	  st_synchronize();
+	  current_position[X_AXIS] = clean_end[ext][X_AXIS];
+	  current_position[Y_AXIS] = clean_end[ext][Y_AXIS];	  
+}
+
+void do_cleaning(unsigned long ext, bool purge){
+
+	  float oldx = 0.0;
+	  float oldy = 0.0;
+
+	  disable_all_solenoids();
+	  st_synchronize();
+
+	  oldx = current_position[X_AXIS];
+	  oldy = current_position[Y_AXIS];
+	  
+	  feedrate = homing_feedrate[X_AXIS];
+	  if(homing_feedrate[Y_AXIS]<feedrate)
+		  feedrate = homing_feedrate[Y_AXIS];
+
+//move to start
+	  do_clean_start(ext);
+
+//extrude and wait
+	  if(purge){
+
+		  do_purge(1, 1, ext);
+		  do_purge(1, 1, ext);
+		  do_purge(1, 1, ext);
+		  do_purge(2, 2, ext);
+
+		  do_purge(3, 5, ext);
+
+		  do_purge(5, 10, ext);
+		  do_purge(10, 5, ext);
+		  float pfeed = 0.0; 
+		  
+		  do_dwell(5000);
+      }
+	  
+//move to end
+	  enable_solenoid(ext);
+	  do_clean_end(ext);
+
+//move back
+	  disable_all_solenoids();
+	  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+	  plan_buffer_line(oldx, oldy, current_position[Z_AXIS], current_position[E_AXIS], feedrate/60, active_extruder);
+	  st_synchronize();
+	  current_position[X_AXIS] = oldx;
+	  current_position[Y_AXIS] = oldy;
+	  enable_solenoid_on_active_extruder();
+
+}
+
+void do_purge(float purge_speed, float purge_distance, unsigned long ext)
+{
+		  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+		  plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],
+						   current_position[Z_AXIS], current_position[E_AXIS] + purge_distance,
+						   pfeed, ext);
+		  current_position[E_AXIS] += purge_distance;
+		  st_synchronize();
+}

@@ -393,10 +393,10 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define Z_MAX_LENGTH (Z_MAX_POS - Z_MIN_POS)
 
 //fblb
-#define CLEAN_START0 {0, 250} 
-#define CLEAN_START1 {16, 250} 
-#define CLEAN_END0 {0, 240}
-#define CLEAN_END1 {16, 240}
+#define CLEAN_START0 {19.5, 205} 
+#define CLEAN_START1 {4.5, 205} 
+#define CLEAN_END0 {19.5, 235}
+#define CLEAN_END1 {4.5, 235}
 
 //============================= Bed Auto Leveling ===========================
 
