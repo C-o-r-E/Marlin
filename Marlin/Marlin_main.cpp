@@ -4668,6 +4668,8 @@ void do_cleaning(unsigned long ext, bool purge){
 
 //move to start
 	  do_clean_start(ext);
+	  enable_solenoid(ext);
+	  do_dwell(800);
 
 //extrude and wait
 	  if(purge){
@@ -4681,13 +4683,21 @@ void do_cleaning(unsigned long ext, bool purge){
 
 		  do_purge(5, 10, ext);
 		  do_purge(10, 5, ext);
-		  float pfeed = 0.0; 
+
+//retract 
+		  do_purge(5, -5, ext);
 		  
 		  do_dwell(5000);
       }
 	  
 //move to end
+	  do_clean_end(ext);
+
+//one more pass
+	  disable_all_solenoids();
+	  do_clean_start(ext);
 	  enable_solenoid(ext);
+	  do_dwell(800);
 	  do_clean_end(ext);
 
 //move back
@@ -4706,7 +4716,7 @@ void do_purge(float purge_speed, float purge_distance, unsigned long ext)
 		  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
 		  plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS],
 						   current_position[Z_AXIS], current_position[E_AXIS] + purge_distance,
-						   pfeed, ext);
+						   purge_speed, ext);
 		  current_position[E_AXIS] += purge_distance;
 		  st_synchronize();
 }
