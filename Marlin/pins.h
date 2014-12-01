@@ -2919,6 +2919,12 @@ s2 == pin40
 s3 == pin7 
 */
 
+//#define E0_INPUT_SW
+//#define E0_OUTPUT_SW
+
+#define E1_INPUT_SW         57
+#define E1_OUTPUT_SW        58
+
 #endif /* 390 */
 
 

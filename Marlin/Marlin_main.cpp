@@ -608,6 +608,15 @@ void setup()
   pinMode(SERVO0_PIN, OUTPUT);
   digitalWrite(SERVO0_PIN, LOW); // turn it off
 #endif // Z_PROBE_SLED
+
+#if defined(E1_INPUT_SW)
+  pinMode(E1_INPUT_SW, INPUT);
+  digitalWrite(E1_INPUT_SW, HIGH);
+#endif
+#if defined(E1_OUTPUT_SW)
+  pinMode(E1_OUTPUT_SW, INPUT);
+  digitalWrite(E1_OUTPUT_SW, HIGH);
+#endif
 }
 
 
@@ -2790,6 +2799,15 @@ Sigma_Exit:
         *(starpos)='\0';
       lcd_setstatus(strchr_pointer + 5);
       break;
+
+		case 318: //fblb
+			SERIAL_PROTOCOLPGM("E1 input:");
+			SERIAL_PROTOCOL(digitalRead(E1_INPUT_SW));
+			SERIAL_PROTOCOLPGM(" output:");
+			SERIAL_PROTOCOL(digitalRead(E1_OUTPUT_SW));
+			SERIAL_PROTOCOLLN("");
+	  break;
+
     case 114: // M114
       SERIAL_PROTOCOLPGM("X:");
       SERIAL_PROTOCOL(current_position[X_AXIS]);
