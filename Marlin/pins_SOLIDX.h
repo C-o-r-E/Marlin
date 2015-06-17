@@ -6,6 +6,16 @@
   #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
 #endif
 
+// custom pin mapping
+
+#define	DIO86_PIN		PIND4
+#define	DIO86_RPORT	PIND
+#define	DIO86_WPORT	PORTD
+#define	DIO86_DDR		DDRD
+#define DIO86_PWM		NULL
+
+// end pin mapping
+
 #define LARGE_FLASH true
 
 #define X_STEP_PIN         54
@@ -20,7 +30,7 @@
 #define Y_MIN_PIN          14
 #define Y_MAX_PIN          15
 
-#define Z_STEP_PIN         46
+#define Z_STEP_PIN         86 //custom
 #define Z_DIR_PIN          48
 #define Z_ENABLE_PIN       62
 #define Z_MIN_PIN          18
@@ -59,22 +69,29 @@
 #define SDSS               -1
 #define LED_PIN            13
 
+/*
 #if MB(RAMPS_13_EEB) && defined(FILAMENT_SENSOR)  // FMM added for Filament Extruder
   // define analog pin for the filament width sensor input
   // Use the RAMPS 1.4 Analog input 5 on the AUX2 connector
   #define FILWIDTH_PIN        5
 #endif
+*/
 
+/*
 #ifdef Z_PROBE_ENDSTOP
   // Define a pin to use as the signal pin on Arduino for the Z_PROBE endstop.
   #define Z_PROBE_PIN 18
 #endif
+*/
 
+/*
 #ifdef FILAMENT_RUNOUT_SENSOR
   // define digital pin 4 for the filament runout sensor. Use the RAMPS 1.4 digital input 4 on the servos connector
   #define FILRUNOUT_PIN        4
 #endif
+*/
 
+/*
 #if MB(RAMPS_13_EFF) || defined(IS_RAMPS_EFB)
   #define FAN_PIN            9 // (Sprinter config)
   #if MB(RAMPS_13_EFF)
@@ -85,9 +102,13 @@
 #else
   #define FAN_PIN            5 // IO pin. Buffer needed
 #endif
+*/
+
+#define FAN_PIN          46
 
 #define PS_ON_PIN          -1
 
+/*
 #if defined(REPRAP_DISCOUNT_SMART_CONTROLLER) || defined(G3D_PANEL)
   #define KILL_PIN           41
 #else
@@ -105,8 +126,12 @@
 #else
   #define HEATER_1_PIN       10    // EXTRUDER 2 (FAN On Sprinter)
 #endif
+*/
 
-#define HEATER_2_PIN       -1
+#define HEATER_0_PIN       12
+#define HEATER_1_PIN       11
+#define HEATER_2_PIN       10
+#define HEATER_3_PIN       9
 
 #define TEMP_0_PIN         10   // ANALOG NUMBERING
 #define TEMP_1_PIN         11   // ANALOG NUMBERING
@@ -119,7 +144,7 @@
   #define HEATER_BED_PIN     8    // BED
 #endif
 
-#define TEMP_BED_PIN       9   // ANALOG NUMBERING
+#define TEMP_BED_PIN       5   // ANALOG NUMBERING
 
 #ifdef NUM_SERVOS
   #define SERVO0_PIN         11
