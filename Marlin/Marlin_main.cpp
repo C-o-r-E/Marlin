@@ -4625,7 +4625,23 @@ inline void gcode_M303() {
    */
   inline void gcode_M381() { disable_all_solenoids(); }
 
+
 #endif // EXT_SOLENOID
+
+#ifdef PRESSURE_SENSOR
+
+/**
+ * M382: Report raw pressure sensor values
+ */
+inline void gcode_M382() {
+  SERIAL_PROTOCOL(" Pressure A:");
+  SERIAL_PROTOCOL(getPressure(0));
+  SERIAL_PROTOCOL(" Pressure B:");
+  SERIAL_PROTOCOL(getPressure(1));
+  SERIAL_EOL;
+}
+
+#endif //PRESSURE_SENSOR
 
 /**
  * M400: Finish all moves
@@ -5668,6 +5684,10 @@ void process_next_command() {
           gcode_M365();
           break;
       #endif // SCARA
+
+    case 382:
+      gcode_M382();
+      break;
 
       case 400: // M400 finish all moves
         gcode_M400();

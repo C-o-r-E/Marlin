@@ -156,4 +156,6 @@ FORCE_INLINE void autotempShutdown() {
   #endif
 }
 
+long getPressure(int sensor);
+
 #endif // TEMPERATURE_H

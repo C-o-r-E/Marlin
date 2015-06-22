@@ -196,6 +196,13 @@ static void updateTemperaturesFromRawValues();
 //================================ Functions ================================
 //===========================================================================
 
+long getPressure(int sensor) {
+  if(sensor == 0) {
+    return current_raw_pressure_a;
+  }
+  return current_raw_pressure_b;
+}
+
 void PID_autotune(float temp, int extruder, int ncycles) {
   float input = 0.0;
   int cycles = 0;
@@ -1532,7 +1539,8 @@ ISR(TIMER0_COMPB_vect) {
         }
       #endif
       temp_state = PreparePressA;
-      temp_count++;
+//      temp_state = PrepareTemp_0;
+//      temp_count++;
       break;
 
   case PreparePressA:
@@ -1548,7 +1556,6 @@ ISR(TIMER0_COMPB_vect) {
       raw_pressA_value += ADC;
     #endif
       temp_state = PreparePressB;
-      temp_count++;
     break;
 
   case PreparePressB:
