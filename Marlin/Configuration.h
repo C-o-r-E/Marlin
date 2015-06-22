@@ -810,6 +810,14 @@ const bool Z_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic 
 //#define FILAMENT_LCD_DISPLAY
 
 
+/*****************
+ * Pressure sense
+ ****************/
+
+#define PRESSURE_SENSOR
+
+
+
 
 
 

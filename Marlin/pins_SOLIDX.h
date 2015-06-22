@@ -277,3 +277,8 @@
   #define MISO_PIN         50
   #define MOSI_PIN         51
 #endif
+
+#ifdef PRESSURE_SENSOR
+  #define PRESSA_PIN       68
+  #define PRESSB_PIN       69
+#endif

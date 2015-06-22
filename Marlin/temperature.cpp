@@ -73,6 +73,11 @@ unsigned char soft_pwm_bed;
   int current_raw_filwidth = 0;  //Holds measured filament diameter - one extruder only
 #endif  
 
+#ifdef PRESSURE_SENSOR
+  int current_raw_pressure_a = 0;
+  int current_raw_pressure_b = 0;
+#endif
+
 #if defined(THERMAL_PROTECTION_HOTENDS) || defined(THERMAL_PROTECTION_BED)
   enum TRState { TRReset, TRInactive, TRFirstHeating, TRStable, TRRunaway };
   void thermal_runaway_protection(TRState *state, millis_t *timer, float temperature, float target_temperature, int heater_id, int period_seconds, int hysteresis_degc);
@@ -914,6 +919,10 @@ void tp_init() {
   #if HAS_FILAMENT_SENSOR
     ANALOG_SELECT(FILWIDTH_PIN);
   #endif
+  #ifdef PRESSURE_SENSOR
+    ANALOG_SELECT(PRESSA_PIN);
+    ANALOG_SELECT(PRESSB_PIN);
+  #endif
 
   #if HAS_AUTO_FAN_0
     pinMode(EXTRUDER_0_AUTO_FAN_PIN, OUTPUT);
@@ -1189,6 +1198,10 @@ enum TempState {
   MeasureTemp_3,
   Prepare_FILWIDTH,
   Measure_FILWIDTH,
+  PreparePressA,
+  MeasurePressA,
+  PreparePressB,
+  MeasurePressB,
   StartupDelay // Startup, delay initial temp reading a tiny bit so the hardware can settle
 };
 
@@ -1257,6 +1270,11 @@ ISR(TIMER0_COMPB_vect) {
 
   #if HAS_FILAMENT_SENSOR
     static unsigned long raw_filwidth_value = 0;
+  #endif
+
+  #ifdef PRESSURE_SENSOR
+    static unsigned long raw_pressA_value = 0;
+    static unsigned long raw_pressB_value = 0;
   #endif
   
   #ifndef SLOW_PWM_HEATERS
@@ -1513,9 +1531,42 @@ ISR(TIMER0_COMPB_vect) {
           raw_filwidth_value += ((unsigned long)ADC<<7);  //add new ADC reading
         }
       #endif
-      temp_state = PrepareTemp_0;
+      temp_state = PreparePressA;
       temp_count++;
       break;
+
+  case PreparePressA:
+    #ifdef PRESSURE_SENSOR
+      START_ADC(PRESSA_PIN);
+    #endif
+    lcd_buttons_update();
+    temp_state = MeasurePressA;
+    break;
+
+  case MeasurePressA:
+    #ifdef PRESSURE_SENSOR
+      raw_pressA_value += ADC;
+    #endif
+      temp_state = PreparePressB;
+      temp_count++;
+    break;
+
+  case PreparePressB:
+    #ifdef PRESSURE_SENSOR
+      START_ADC(PRESSB_PIN);
+    #endif
+    lcd_buttons_update();
+    temp_state = MeasurePressA;    
+    break;
+
+  case MeasurePressB:
+    #ifdef PRESSURE_SENSOR
+      raw_pressB_value += ADC;
+    #endif
+      temp_state = PrepareTemp_0;
+      temp_count++;
+    break;
+    
 
     case StartupDelay:
       temp_state = PrepareTemp_0;
@@ -1535,6 +1586,11 @@ ISR(TIMER0_COMPB_vect) {
     #if HAS_FILAMENT_SENSOR
       current_raw_filwidth = raw_filwidth_value >> 10;  // Divide to get to 0-16384 range since we used 1/128 IIR filter approach
     #endif
+
+      #ifdef PRESSURE_SENSOR
+      current_raw_pressure_a = raw_pressA_value >> 10;
+      current_raw_pressure_b = raw_pressB_value >> 10;
+      #endif
 
     temp_count = 0;
     for (int i = 0; i < 4; i++) raw_temp_value[i] = 0;
