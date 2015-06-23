@@ -1538,9 +1538,9 @@ ISR(TIMER0_COMPB_vect) {
           raw_filwidth_value += ((unsigned long)ADC<<7);  //add new ADC reading
         }
       #endif
-      temp_state = PreparePressA;
-//      temp_state = PrepareTemp_0;
-//      temp_count++;
+	      temp_state = PreparePressA;
+	//      temp_state = PrepareTemp_0;
+	//      temp_count++;
       break;
 
   case PreparePressA:
@@ -1563,7 +1563,7 @@ ISR(TIMER0_COMPB_vect) {
       START_ADC(PRESSB_PIN);
     #endif
     lcd_buttons_update();
-    temp_state = MeasurePressA;    
+    temp_state = MeasurePressB;    
     break;
 
   case MeasurePressB:
@@ -1594,10 +1594,13 @@ ISR(TIMER0_COMPB_vect) {
       current_raw_filwidth = raw_filwidth_value >> 10;  // Divide to get to 0-16384 range since we used 1/128 IIR filter approach
     #endif
 
-      #ifdef PRESSURE_SENSOR
-      current_raw_pressure_a = raw_pressA_value >> 10;
-      current_raw_pressure_b = raw_pressB_value >> 10;
-      #endif
+    #ifdef PRESSURE_SENSOR
+      current_raw_pressure_a = raw_pressA_value;
+      current_raw_pressure_b = raw_pressB_value;
+
+      raw_pressA_value = 0;
+      raw_pressB_value = 0;
+    #endif
 
     temp_count = 0;
     for (int i = 0; i < 4; i++) raw_temp_value[i] = 0;

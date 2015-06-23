@@ -138,11 +138,13 @@
 #define TEMP_2_PIN         12   // ANALOG NUMBERING
 #define TEMP_3_PIN         13   // ANALOG NUMBERING
 
-#if MB(RAMPS_13_EFF) || MB(RAMPS_13_EEF) || MB(RAMPS_13_SF)
-  #define HEATER_BED_PIN     -1    // NO BED
-#else
-  #define HEATER_BED_PIN     8    // BED
+#ifdef PRESSURE_SENSOR
+  #define PRESSA_PIN       14  //68 --analog?
+  #define PRESSB_PIN       15  //69 --analog?
 #endif
+
+#define HEATER_BED_PIN     8    // BED
+
 
 #define TEMP_BED_PIN       5   // ANALOG NUMBERING
 
@@ -278,7 +280,3 @@
   #define MOSI_PIN         51
 #endif
 
-#ifdef PRESSURE_SENSOR
-  #define PRESSA_PIN       68
-  #define PRESSB_PIN       69
-#endif
