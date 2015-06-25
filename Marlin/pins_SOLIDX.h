@@ -9,10 +9,16 @@
 // custom pin mapping
 
 #define	DIO86_PIN		PIND4
-#define	DIO86_RPORT	PIND
-#define	DIO86_WPORT	PORTD
+#define	DIO86_RPORT	        PIND
+#define	DIO86_WPORT	        PORTD
 #define	DIO86_DDR		DDRD
 #define DIO86_PWM		NULL
+
+#define DIO87_PIN               PINE2
+#define DIO87_RPORT             PINE
+#define DIO87_WPORT             PORTE
+#define DIO87_DDR               DDRE
+#define DIO87_PWM               NULL
 
 // end pin mapping
 
@@ -68,6 +74,11 @@
 #define SDPOWER            -1
 #define SDSS               -1
 #define LED_PIN            13
+
+#define SERVO_ENABLE_PIN   87
+
+#define SRV0_PIN           4
+
 
 /*
 #if MB(RAMPS_13_EEB) && defined(FILAMENT_SENSOR)  // FMM added for Filament Extruder

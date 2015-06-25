@@ -4644,6 +4644,25 @@ inline void gcode_M382() {
 #endif //PRESSURE_SENSOR
 
 /**
+ * M383: TODO: give this a name
+ */
+inline void gcode_M383() {
+  SERIAL_PROTOCOL(" Toggle");
+  TOGGLE(SERVO_ENABLE_PIN);
+  SERIAL_EOL;
+}
+
+inline void gcode_M384() {
+  pinMode(SRV0_PIN, OUTPUT);
+  analogWrite(SRV0_PIN, 64);
+}
+
+inline void gcode_M385() {
+  analogWrite(SRV0_PIN, 0);
+}
+
+
+/**
  * M400: Finish all moves
  */
 inline void gcode_M400() { st_synchronize(); }
@@ -5687,6 +5706,18 @@ void process_next_command() {
 
     case 382:
       gcode_M382();
+      break;
+
+    case 383:
+      gcode_M383();
+      break;
+
+    case 384:
+      gcode_M384();
+      break;
+
+    case 385:
+      gcode_M385();
       break;
 
       case 400: // M400 finish all moves
