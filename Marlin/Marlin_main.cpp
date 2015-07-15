@@ -4634,10 +4634,90 @@ inline void gcode_M303() {
  * M382: Report raw pressure sensor values
  */
 inline void gcode_M382() {
+  /*
   SERIAL_PROTOCOL(" Pressure A:");
   SERIAL_PROTOCOL(getPressure(0));
   SERIAL_PROTOCOL(" Pressure B:");
   SERIAL_PROTOCOL(getPressure(1));
+  SERIAL_EOL;
+  */
+
+  SERIAL_PROTOCOL(" Set up PWM for servo given by S param:");
+  SERIAL_EOL;
+
+  int s = 0;
+
+  if(code_seen('S')) {
+    s = code_value();
+  }
+
+  switch(s){
+  case 0:
+    SERIAL_PROTOCOL(" Servo 0");
+    SERIAL_EOL;
+
+    //current registers
+    SERIAL_PROTOCOL(" Timer :");
+    SERIAL_EOL;
+
+    SERIAL_PROTOCOL(" DDRG:");
+    SERIAL_PROTOCOL((int)DDRG);
+    SERIAL_PROTOCOL(" TCCR0A:");
+    SERIAL_PROTOCOL((int)TCCR0A);
+
+
+    //now toggle them
+    DDRG ^= (1 << 5); // togle 5 as output
+    TCCR0A ^= 0x20; // toggle using the pwm pin on compare match
+    TCCR0B ^= 0x06; // toggle between 64 and 1024 prescale
+
+
+    break;
+  case 1:
+    SERIAL_PROTOCOL(" Servo 1");
+    SERIAL_EOL;
+
+    SERIAL_PROTOCOL(" Timer 3:");
+    SERIAL_EOL;
+    
+    SERIAL_PROTOCOL(" DDRE:");
+    SERIAL_PROTOCOL((int)DDRE);
+    SERIAL_PROTOCOL(" TCCR3A:");
+    SERIAL_PROTOCOL((int)TCCR3A);
+    SERIAL_PROTOCOL(" TCCR3B:");
+    SERIAL_PROTOCOL((int)TCCR3B);
+
+
+    // now set it
+
+    DDRE |= 1 << 3;
+    TCCR3A = 0x82;
+    TCCR3B = 0x1A;
+
+    OCR3AH = 0x0B;
+    OCR3AL = 0x85;
+
+    ICR3H = 0x9C;
+    ICR3L = 0x3F;
+
+
+    break;
+  case 2:
+    SERIAL_PROTOCOL(" Servo 2");
+    SERIAL_EOL;
+    break;
+  case 3:
+    SERIAL_PROTOCOL(" Servo 3");
+    SERIAL_EOL;
+    break;
+
+  default:
+    SERIAL_PROTOCOL(" Unkown Servo:");
+    SERIAL_PROTOCOL(s);
+    break;
+    }
+
+
   SERIAL_EOL;
 }
 
@@ -4647,18 +4727,33 @@ inline void gcode_M382() {
  * M383: TODO: give this a name
  */
 inline void gcode_M383() {
-  SERIAL_PROTOCOL(" Toggle");
+  SERIAL_PROTOCOL(" Toggle Servo Enable");
+
   TOGGLE(SERVO_ENABLE_PIN);
+
   SERIAL_EOL;
 }
 
 inline void gcode_M384() {
-  pinMode(SRV0_PIN, OUTPUT);
-  analogWrite(SRV0_PIN, 64);
+
+  SERIAL_PROTOCOL(" Relaxed Servo Position");
+  SERIAL_EOL;
+
+  //SRV1
+  OCR3AH = 0x0B;
+  OCR3AL = 0x85;
+  
 }
 
 inline void gcode_M385() {
-  analogWrite(SRV0_PIN, 0);
+  //analogWrite(SRV0_PIN, 0);
+
+  SERIAL_PROTOCOL(" Tensioned Servo Position");
+  SERIAL_EOL;
+
+  //SRV1
+  OCR3AH = 0x1A;
+  OCR3AL = 0xE1;
 }
 
 

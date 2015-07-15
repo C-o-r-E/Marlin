@@ -77,7 +77,7 @@
 
 #define SERVO_ENABLE_PIN   87
 
-#define SRV0_PIN           4
+//#define SRV0_PIN           4
 
 
 /*
@@ -160,13 +160,13 @@
 #define TEMP_BED_PIN       5   // ANALOG NUMBERING
 
 #ifdef NUM_SERVOS
-  #define SERVO0_PIN         11
+  #define SERVO0_PIN         4
   #if NUM_SERVOS > 1
-    #define SERVO1_PIN        6
+    #define SERVO1_PIN        5
     #if NUM_SERVOS > 2
-      #define SERVO2_PIN      5
+      #define SERVO2_PIN      6
       #if NUM_SERVOS > 3
-        #define SERVO3_PIN    4
+        #define SERVO3_PIN    7
       #endif
     #endif
   #endif
