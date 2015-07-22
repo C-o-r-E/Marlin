@@ -4642,82 +4642,76 @@ inline void gcode_M382() {
   SERIAL_EOL;
   */
 
-  SERIAL_PROTOCOL(" Set up PWM for servo given by S param:");
+  SERIAL_PROTOCOL(" Set up PWM for all servos:");
   SERIAL_EOL;
 
-  int s = 0;
+  ///////////////////////////////////
+  // Set up Timer4 for Servo 0, 2, 3
+  ///////////////////////////////////
 
-  if(code_seen('S')) {
-    s = code_value();
-  }
+  //Servo0 uses 4C (and black magic)
+  DDRG |= 1 << 5;
+  TIMSK4 |= 1 << OCIE4C;
+  TIMSK4 |= 1 << TOIE4;
 
-  switch(s){
-  case 0:
-    SERIAL_PROTOCOL(" Servo 0");
-    SERIAL_EOL;
+  //Servo2 uses 4A
+  //Servo3 uses 4B
 
-    //current registers
-    SERIAL_PROTOCOL(" Timer :");
-    SERIAL_EOL;
+  DDRH |= 1 << 3;
+  DDRH |= 1 << 4;
 
-    SERIAL_PROTOCOL(" DDRG:");
-    SERIAL_PROTOCOL((int)DDRG);
-    SERIAL_PROTOCOL(" TCCR0A:");
-    SERIAL_PROTOCOL((int)TCCR0A);
+  //TCCR4A = 0x82;
+  TCCR4A = 0;
+  TCCR4A |= 1 << COM4A1;
+  TCCR4A |= 1 << WGM41;
+  TCCR4A |= 1 << COM4B1;
+  
+  TCCR4B = 0x1A;
 
+  //TCCR4A = 0xA2;
+  
+  OCR4AH = 0x0B;
+  OCR4BH = 0x0B;
+  OCR4CH = 0x0B;
 
-    //now toggle them
-    DDRG ^= (1 << 5); // togle 5 as output
-    TCCR0A ^= 0x20; // toggle using the pwm pin on compare match
-    TCCR0B ^= 0x06; // toggle between 64 and 1024 prescale
+  OCR4AL = 0x85;  
+  OCR4BL = 0x85;
+  OCR4CL = 0x85;
 
+  
+  ICR4H = 0x9C;
+  ICR4L = 0x3F;
+  
+  
+  SERIAL_PROTOCOL(" Timer 4:");
+  SERIAL_EOL;
+  
+  SERIAL_PROTOCOL(" TCCR4A:");
+  SERIAL_PROTOCOL((int)TCCR4A);
+  SERIAL_PROTOCOL(" TCCR4B:");
+  SERIAL_PROTOCOL((int)TCCR4B);
 
-    break;
-  case 1:
-    SERIAL_PROTOCOL(" Servo 1");
-    SERIAL_EOL;
+  ///////////////////////////////////
+  // Set up Timer3 for Servo 1
+  ///////////////////////////////////
+  DDRE |= 1 << 3;
+  TCCR3A = 0x82;
+  TCCR3B = 0x1A;
+  
+  OCR3AH = 0x0B;
+  OCR3AL = 0x85;
+  
+  ICR3H = 0x9C;
+  ICR3L = 0x3F;
 
-    SERIAL_PROTOCOL(" Timer 3:");
-    SERIAL_EOL;
-    
-    SERIAL_PROTOCOL(" DDRE:");
-    SERIAL_PROTOCOL((int)DDRE);
-    SERIAL_PROTOCOL(" TCCR3A:");
-    SERIAL_PROTOCOL((int)TCCR3A);
-    SERIAL_PROTOCOL(" TCCR3B:");
-    SERIAL_PROTOCOL((int)TCCR3B);
-
-
-    // now set it
-
-    DDRE |= 1 << 3;
-    TCCR3A = 0x82;
-    TCCR3B = 0x1A;
-
-    OCR3AH = 0x0B;
-    OCR3AL = 0x85;
-
-    ICR3H = 0x9C;
-    ICR3L = 0x3F;
-
-
-    break;
-  case 2:
-    SERIAL_PROTOCOL(" Servo 2");
-    SERIAL_EOL;
-    break;
-  case 3:
-    SERIAL_PROTOCOL(" Servo 3");
-    SERIAL_EOL;
-    break;
-
-  default:
-    SERIAL_PROTOCOL(" Unkown Servo:");
-    SERIAL_PROTOCOL(s);
-    break;
-    }
-
-
+  SERIAL_PROTOCOL(" Timer 3:");
+  SERIAL_EOL;
+  
+  SERIAL_PROTOCOL(" TCCR3A:");
+  SERIAL_PROTOCOL((int)TCCR3A);
+  SERIAL_PROTOCOL(" TCCR3B:");
+  SERIAL_PROTOCOL((int)TCCR3B);
+  
   SERIAL_EOL;
 }
 
@@ -4740,9 +4734,20 @@ inline void gcode_M384() {
   SERIAL_EOL;
 
   //SRV1
-  OCR3AH = 0x0B;
-  OCR3AL = 0x85;
-  
+  OCR3AH = 0x07;
+  OCR3AL = 0xD0;
+
+  //SRV2
+  OCR4AH = 0x07;
+  OCR4AL = 0xD0;
+
+  //SRV3
+  OCR4BH = 0x07;
+  OCR4BL = 0xD0;
+
+  //SRV0
+  OCR4CH = 0x07;
+  OCR4CL = 0xD0;
 }
 
 inline void gcode_M385() {
@@ -4752,8 +4757,20 @@ inline void gcode_M385() {
   SERIAL_EOL;
 
   //SRV1
-  OCR3AH = 0x1A;
-  OCR3AL = 0xE1;
+  OCR3AH = 0x0F;
+  OCR3AL = 0xA0;
+
+  //SRV2
+  OCR4AH = 0x0F;
+  OCR4AL = 0xA0;
+
+  //SRV3
+  OCR4BH = 0x0F;
+  OCR4BL = 0xA0;
+
+  //SRV0
+  OCR4CH = 0x0F;
+  OCR4CL = 0xA0;
 }
 
 
@@ -6767,4 +6784,22 @@ float calculate_volumetric_multiplier(float diameter) {
 void calculate_volumetric_multipliers() {
   for (int i=0; i<EXTRUDERS; i++)
     volumetric_multiplier[i] = calculate_volumetric_multiplier(filament_size[i]);
+}
+
+ISR(TIMER4_COMPC_vect) {
+
+  //set pg5 to low
+  PORTG &= 0xF & ~(1 << 5);
+
+  TIFR4 = 0;
+  return;
+}
+
+ISR(TIMER4_OVF_vect) {
+
+  //set PG5 high
+  PORTG |= 1 << 5;
+
+  TIFR4 = 0;
+  return;
 }
