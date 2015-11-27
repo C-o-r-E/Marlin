@@ -75,7 +75,18 @@
 #define SDSS               -1
 #define LED_PIN            13
 
+//custom stuff
+
+#define Z_PROBE_PIN         35
+
+#define ARTICULATED_EXTRUDERS 1
+
+#define SERVO_SELECTED_TOOL 1
+
 #define SERVO_ENABLE_PIN   87
+
+#define SAFE_Z_DISTANCE  10
+
 
 //#define SRV0_PIN           4
 

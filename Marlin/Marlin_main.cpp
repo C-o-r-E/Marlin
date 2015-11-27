@@ -575,7 +575,191 @@ void servo_init() {
     delay(PROBE_SERVO_DEACTIVATION_DELAY);
     servo[servo_endstops[Z_AXIS]].detach();
   #endif
+
+  #ifdef SERVO_SELECTED_TOOL
+    //do our custom servo timer init
+
+  
+  ///////////////////////////////////
+  // Set up Timer4 for Servo 0, 2, 3
+  ///////////////////////////////////
+
+  //Servo0 uses 4C (and black magic)
+  DDRG |= 1 << 5;
+  TIMSK4 |= 1 << OCIE4C;
+  TIMSK4 |= 1 << TOIE4;
+
+  //Servo2 uses 4A
+  //Servo3 uses 4B
+
+  DDRH |= 1 << 3;
+  DDRH |= 1 << 4;
+
+  //TCCR4A = 0x82;
+  TCCR4A = 0;
+  TCCR4A |= 1 << COM4A1;
+  TCCR4A |= 1 << WGM41;
+  TCCR4A |= 1 << COM4B1;
+  
+  TCCR4B = 0x1A;
+
+  //TCCR4A = 0xA2;
+  
+  OCR4AH = 0x0B;
+  OCR4BH = 0x0B;
+  OCR4CH = 0x0B;
+
+  OCR4AL = 0x85;  
+  OCR4BL = 0x85;
+  OCR4CL = 0x85;
+
+  
+  ICR4H = 0x9C;
+  ICR4L = 0x3F;
+  
+  
+  ///////////////////////////////////
+  // Set up Timer3 for Servo 1
+  ///////////////////////////////////
+  DDRE |= 1 << 3;
+  TCCR3A = 0x82;
+  TCCR3B = 0x1A;
+  
+  OCR3AH = 0x0B;
+  OCR3AL = 0x85;
+  
+  ICR3H = 0x9C;
+  ICR3L = 0x3F;
+
+  #endif //SERVO_SELECTED_TOOL
 }
+
+#ifdef SERVO_SELECTED_TOOL
+
+ void disable_servo_on_all_extruders() {
+   uint32_t time_now;
+   uint32_t time_complete;
+   uint8_t ext_num = active_extruder;
+
+   TOGGLE(SERVO_ENABLE_PIN);   
+
+   //SRV0 relaxed
+   OCR4CH = 0x07;
+   OCR4CL = 0xD0;
+   
+   //SRV1 relaxed
+   OCR3AH = 0x07;
+   OCR3AL = 0xD0;
+   
+   //SRV2 relaxed
+   OCR4AH = 0x07;
+   OCR4AL = 0xD0;
+   
+   //SRV2 relaxed
+   OCR4BH = 0x07;
+   OCR4BL = 0xD0;
+
+   /*
+     wait for it to finish
+   */
+   
+   time_now = millis();
+   time_complete = millis() + 2500;
+   while(millis() < time_complete) { idle(); }
+
+   TOGGLE(SERVO_ENABLE_PIN);
+
+ }
+
+ void enable_servo_on_active_extruder() {
+   uint32_t time_now;
+   uint32_t time_complete;
+   uint8_t ext_num = active_extruder;
+
+   /*
+     first we give power to the the servos 
+   */
+
+   //  SERIAL_PROTOCOL(" Toggle Servo Enable");
+   TOGGLE(SERVO_ENABLE_PIN);
+   //  SERIAL_EOL;
+
+  /*
+    take action for each extruder
+  */
+
+  if (ext_num == 0) {
+      //SRV0 articulated
+      OCR4CH = 0x0F;
+      OCR4CL = 0xA0;
+    }
+  else {
+      //SRV0 relaxed
+      OCR4CH = 0x07;
+      OCR4CL = 0xD0;
+    }
+  
+  if (ext_num == 1) {
+      //SRV1 articulated
+      OCR3AH = 0x0F;
+      OCR3AL = 0xA0;
+    }
+  else {
+      //SRV1 relaxed
+      OCR3AH = 0x07;
+      OCR3AL = 0xD0;
+    }
+  
+  if (ext_num == 2) {
+      //SRV2 articulated
+      OCR4AH = 0x0F;
+      OCR4AL = 0xA0;
+    }
+  else {
+      //SRV2 relaxed
+      OCR4AH = 0x07;
+      OCR4AL = 0xD0;
+    }
+  
+  if (ext_num == 3) {
+      //SRV2 articulated
+      OCR4BH = 0x0F;
+      OCR4BL = 0xA0;
+    }
+  else {
+      //SRV2 relaxed
+      OCR4BH = 0x07;
+      OCR4BL = 0xD0;
+    }
+
+
+
+  /*
+    wait for it to finish
+  */
+
+  time_now = millis();
+  time_complete = millis() + 2500;
+  while(millis() < time_complete) { idle(); }
+ 
+
+  /*
+    power off the servos
+  */
+
+  SERIAL_PROTOCOL(" Toggle Servo Enable");
+  TOGGLE(SERVO_ENABLE_PIN);
+  SERIAL_EOL;
+
+   
+
+ }
+
+
+#endif //SERVO_SELECTED_TOOL
+
+
+
 
 /**
  * Marlin entry-point: Set up before the program loop
@@ -649,6 +833,10 @@ void setup() {
   st_init();    // Initialize stepper, this enables interrupts!
   setup_photpin();
   servo_init();
+
+#ifdef SERVO_SELECTED_TOOL
+  enable_servo_on_active_extruder();
+#endif //SERVO_SELECTED_TOOL
 
   #if HAS_CONTROLLERFAN
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
@@ -1621,6 +1809,13 @@ static void homeaxis(AxisEnum axis) {
     ((LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1) || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1))
 
   if (axis == X_AXIS ? HOMEAXIS_DO(X) : axis == Y_AXIS ? HOMEAXIS_DO(Y) : axis == Z_AXIS ? HOMEAXIS_DO(Z) : 0) {
+  
+     #ifdef SERVO_SELECTED_TOOL
+     if(axis == Z_AXIS)
+     {
+	  disable_servo_on_all_extruders();
+     }
+     #endif
 
     int axis_home_dir =
       #ifdef DUAL_X_CARRIAGE
@@ -1687,6 +1882,18 @@ static void homeaxis(AxisEnum axis) {
     destination[axis] = 2 * home_bump_mm(axis) * axis_home_dir;
     line_to_destination();
     st_synchronize();
+
+     #ifdef SERVO_SELECTED_TOOL
+     if(axis == Z_AXIS)
+     {
+
+//	  destination[axis] = SAFE_Z_DISTANCE;
+//	  line_to_destination();
+//	  st_synchronize();
+	  
+	  //enable_servo_on_active_extruder();
+     }
+     #endif
 
     #ifdef Z_DUAL_ENDSTOPS
       if (axis == Z_AXIS) {
@@ -2245,6 +2452,9 @@ inline void gcode_G28() {
             current_position[Z_AXIS] = 0;
             sync_plan_position();
 
+	    //solidx workaround for stupid lip thing
+	    enable_endstops(false);
+
             //
             // Set the probe (or just the nozzle) destination to the safe homing point
             //
@@ -2261,6 +2471,9 @@ inline void gcode_G28() {
             // Set current X, Y is the Z_SAFE_HOMING_POINT minus PROBE_OFFSET_FROM_EXTRUDER
             current_position[X_AXIS] = destination[X_AXIS];
             current_position[Y_AXIS] = destination[Y_AXIS];
+	    
+	    // solidx
+	    enable_endstops(true);
 
             // Home the Z axis
             HOMEAXIS(Z);
@@ -4774,6 +4987,7 @@ inline void gcode_M385() {
 }
 
 
+
 /**
  * M400: Finish all moves
  */
@@ -5363,11 +5577,19 @@ inline void gcode_T(uint8_t tmp_extruder) {
         if (make_move && IsRunning()) prepare_move();
       }
 
-      #ifdef EXT_SOLENOID
+      #ifdef ARTICULATED_EXTRUDERS
         st_synchronize();
-        disable_all_solenoids();
-        enable_solenoid_on_active_extruder();
-      #endif // EXT_SOLENOID
+	
+	#ifdef EXT_SOLENOID
+          disable_all_solenoids();
+          enable_solenoid_on_active_extruder();
+        #endif // EXT_SOLENOID
+
+        #ifdef SERVO_SELECTED_TOOL
+	  enable_servo_on_active_extruder();
+	#endif //SERVO_SELECTED_TOOL
+
+      #endif // ARTICULATED_EXTRUDERS
 
     #endif // EXTRUDERS > 1
     SERIAL_ECHO_START;
@@ -6803,3 +7025,4 @@ ISR(TIMER4_OVF_vect) {
   TIFR4 = 0;
   return;
 }
+
