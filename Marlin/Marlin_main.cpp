@@ -4993,7 +4993,11 @@ inline void gcode_M385() {
 //purge
 inline void gcode_M386() {
 
-  feedrate = homing_feedrate[X_AXIS];
+  //feedrate = homing_feedrate[X_AXIS];
+
+  feedrate = 3000;
+
+  float startx = current_position[X_AXIS];
 
   //move to bucket
 
@@ -5009,19 +5013,21 @@ inline void gcode_M386() {
 
   float old_feedrate = feedrate;
 
-  feedrate = retract_feedrate * 60;
+  feedrate = 20;
 
-  current_position[E_AXIS] += 10;
-  plan_set_e_position(current_position[E_AXIS]);
-  prepare_move();
-  st_synchronize();
+  for(int i=0; i<10; i++)
+  {
+    destination[E_AXIS] += i;
+    prepare_move();
+    st_synchronize();
+    feedrate += 20;
+  }
 
-
-  feedrate = oldfeedrate;
+  feedrate = old_feedrate;
 
   //move back
 
-  destination[X_AXIS] = current_position[X_AXIS];
+  destination[X_AXIS] = startx;
   destination[Y_AXIS] = current_position[Y_AXIS];
   destination[Z_AXIS] = current_position[Z_AXIS];
 
@@ -5030,6 +5036,21 @@ inline void gcode_M386() {
 
 }
 
+inline void gcode_M387() {
+  float old_feedrate = feedrate;
+
+  feedrate = 20;
+
+  for(int i=0; i<10; i++)
+  {
+    destination[E_AXIS] += i;
+    prepare_move();
+    st_synchronize();
+    feedrate += 20;
+  }
+
+  feedrate = old_feedrate;
+}
 
 
 /**
@@ -6100,6 +6121,10 @@ void process_next_command() {
 
     case 386:
       gcode_M386();
+      break;
+
+    case 387:
+      gcode_M387();
       break;
 
       case 400: // M400 finish all moves
