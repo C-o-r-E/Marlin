@@ -4993,39 +4993,63 @@ inline void gcode_M385() {
 //purge
 inline void gcode_M386() {
 
-  //feedrate = homing_feedrate[X_AXIS];
-
-  feedrate = 3000;
-
+  float old_feedrate = feedrate;
+  int num_pass = 2; //TODO make this a gcode param
   float startx = current_position[X_AXIS];
 
-  //move to bucket
+  float feedrate_purgemove = 3000; //TODO: set this somewhere
+  float feedrate_echelon = 20;
 
-  destination[X_AXIS] = 0;
-  destination[Y_AXIS] = current_position[Y_AXIS];
-  destination[Z_AXIS] = current_position[Z_AXIS];
-
-  line_to_destination();
-  st_synchronize();
-
-
-  //extrude
-
-  float old_feedrate = feedrate;
-
-  feedrate = 20;
-
-  for(int i=0; i<10; i++)
+  for (int i=0; i<2; i++)
   {
-    destination[E_AXIS] += i;
-    prepare_move();
+    /*
+    First we move above the garbage position
+    */
+
+    feedrate = feedrate_purgemove;
+
+    destination[X_AXIS] = 0;
+    destination[Y_AXIS] = current_position[Y_AXIS];
+    destination[Z_AXIS] = current_position[Z_AXIS];
+
+    line_to_destination();
     st_synchronize();
-    feedrate += 20;
+
+    /*
+    Now we need to purge the nozzle
+    */
+
+    feedrate = feedrate_echelon;
+
+    for(int i=0; i<10; i++)
+    {
+      destination[E_AXIS] += i;
+      prepare_move();
+      st_synchronize();
+      feedrate += 20;
+    }
+
+    /*
+    Then move back over the print bed
+    */
+    feedrate = feedrate_purgemove;
+
+    destination[X_AXIS] = 30;
+    destination[Y_AXIS] = current_position[Y_AXIS];
+    destination[Z_AXIS] = current_position[Z_AXIS];
+
+    line_to_destination();
+    st_synchronize();
+
   }
 
-  feedrate = old_feedrate;
 
-  //move back
+
+
+
+
+
+  //move back to where we came from
 
   destination[X_AXIS] = startx;
   destination[Y_AXIS] = current_position[Y_AXIS];
@@ -5033,6 +5057,8 @@ inline void gcode_M386() {
 
   line_to_destination();
   st_synchronize();
+
+  feedrate = old_feedrate;
 
 }
 
