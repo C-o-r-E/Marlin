@@ -1886,12 +1886,15 @@ static void homeaxis(AxisEnum axis) {
      #ifdef SERVO_SELECTED_TOOL
      if(axis == Z_AXIS)
      {
+	  enable_endstops(false);
+	  sync_plan_position();
+          feedrate = homing_feedrate[axis];
+	  destination[axis] = 3.2;
+	  line_to_destination();
+	  st_synchronize();
+	  enable_endstops(true); // Enable endstops for next homing move
 
-//	  destination[axis] = SAFE_Z_DISTANCE;
-//	  line_to_destination();
-//	  st_synchronize();
-	  
-	  //enable_servo_on_active_extruder();
+	  enable_servo_on_active_extruder();
      }
      #endif
 
@@ -4987,6 +4990,47 @@ inline void gcode_M385() {
 }
 
 
+//purge
+inline void gcode_M386() {
+
+  feedrate = homing_feedrate[X_AXIS];
+
+  //move to bucket
+
+  destination[X_AXIS] = 0;
+  destination[Y_AXIS] = current_position[Y_AXIS];
+  destination[Z_AXIS] = current_position[Z_AXIS];
+
+  line_to_destination();
+  st_synchronize();
+
+
+  //extrude
+
+  float old_feedrate = feedrate;
+
+  feedrate = retract_feedrate * 60;
+
+  current_position[E_AXIS] += 10;
+  plan_set_e_position(current_position[E_AXIS]);
+  prepare_move();
+  st_synchronize();
+
+
+  feedrate = oldfeedrate;
+
+  //move back
+
+  destination[X_AXIS] = current_position[X_AXIS];
+  destination[Y_AXIS] = current_position[Y_AXIS];
+  destination[Z_AXIS] = current_position[Z_AXIS];
+
+  line_to_destination();
+  st_synchronize();
+
+}
+
+
 
 /**
  * M400: Finish all moves
@@ -6052,6 +6096,10 @@ void process_next_command() {
 
     case 385:
       gcode_M385();
+      break;
+
+    case 386:
+      gcode_M386();
       break;
 
       case 400: // M400 finish all moves
