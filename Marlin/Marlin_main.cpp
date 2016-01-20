@@ -4997,7 +4997,7 @@ inline void gcode_M386() {
   int num_pass = 2; //TODO make this a gcode param
   float startx = current_position[X_AXIS];
 
-  float feedrate_purgemove = 3000; //TODO: set this somewhere
+  //float feedrate_purgemove = 3000; //TODO: set this somewhere
   float feedrate_echelon = 20;
 
   for (int i=0; i<2; i++)
@@ -5006,14 +5006,16 @@ inline void gcode_M386() {
     First we move above the garbage position
     */
 
-    feedrate = feedrate_purgemove;
+    feedrate = xy_travel_speed;
+    //feedrate = feedrate_purgemove;
 
     destination[X_AXIS] = 0;
     destination[Y_AXIS] = current_position[Y_AXIS];
     destination[Z_AXIS] = current_position[Z_AXIS];
 
-    line_to_destination();
-    st_synchronize();
+    do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
+    //line_to_destination();
+    //st_synchronize();
 
     /*
     Now we need to purge the nozzle
@@ -5032,21 +5034,19 @@ inline void gcode_M386() {
     /*
     Then move back over the print bed
     */
-    feedrate = feedrate_purgemove;
+
+    feedrate = xy_travel_speed;
+    //feedrate = feedrate_purgemove;
 
     destination[X_AXIS] = 30;
     destination[Y_AXIS] = current_position[Y_AXIS];
     destination[Z_AXIS] = current_position[Z_AXIS];
 
-    line_to_destination();
-    st_synchronize();
+    do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
+    //line_to_destination();
+    //st_synchronize();
 
   }
-
-
-
-
-
 
 
   //move back to where we came from
@@ -5055,8 +5055,9 @@ inline void gcode_M386() {
   destination[Y_AXIS] = current_position[Y_AXIS];
   destination[Z_AXIS] = current_position[Z_AXIS];
 
-  line_to_destination();
-  st_synchronize();
+  do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
+  //line_to_destination();
+  //st_synchronize();
 
   feedrate = old_feedrate;
 
