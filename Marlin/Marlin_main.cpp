@@ -238,6 +238,8 @@ float current_position[NUM_AXIS] = { 0.0 };
 static float destination[NUM_AXIS] = { 0.0 };
 bool axis_known_position[3] = { false };
 
+float purge_position[EXTRUDERS] = PURGE_LOCATION;
+
 static long gcode_N, gcode_LastN, Stopped_gcode_LastN = 0;
 
 static char *current_command, *current_command_args;
@@ -4994,29 +4996,56 @@ inline void gcode_M385() {
 inline void gcode_M386() {
 
   float old_feedrate = feedrate;
-  int num_pass = 2; //TODO make this a gcode param
   float startx = current_position[X_AXIS];
-
-  //float feedrate_purgemove = 3000; //TODO: set this somewhere
   float feedrate_echelon = 20;
 
-  for (int i=0; i<2; i++)
+  float p_end = 0;
+
+  switch(active_extruder)
+  {
+    case 0:
+    case 1:
+    {
+      p_end = purge_position[active_extruder] + 30;
+    }
+    break;
+
+    case 2:
+    case 3:
+    {
+      p_end = purge_position[active_extruder] - 30;
+    }
+    break;
+
+    default:
+    {
+      SERIAL_PROTOCOL("Error: active extruder out of range...");
+    }
+    break;
+
+  }
+
+  int num_pass = 1;
+
+  if (code_seen('S'))
+  {
+    num_pass = code_value_short();
+  }
+
+  for (int i=0; i<num_pass; i++)
   {
     /*
     First we move above the garbage position
     */
 
     feedrate = xy_travel_speed;
-    //feedrate = feedrate_purgemove;
 
-    destination[X_AXIS] = 0;
+    destination[X_AXIS] = purge_position[active_extruder];
     destination[Y_AXIS] = current_position[Y_AXIS];
     destination[Z_AXIS] = current_position[Z_AXIS];
 
     do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
-    //line_to_destination();
-    //st_synchronize();
-
+ 
     /*
     Now we need to purge the nozzle
     */
@@ -5038,7 +5067,7 @@ inline void gcode_M386() {
     feedrate = xy_travel_speed;
     //feedrate = feedrate_purgemove;
 
-    destination[X_AXIS] = 30;
+    destination[X_AXIS] = p_end;
     destination[Y_AXIS] = current_position[Y_AXIS];
     destination[Z_AXIS] = current_position[Z_AXIS];
 

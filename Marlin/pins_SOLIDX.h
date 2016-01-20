@@ -6,6 +6,15 @@
   #error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
 #endif
 
+//Some data that is technically not pins
+
+#define PURGE_LOCATION    {15, 1, 366, 364}
+
+#define PURGE_POSX0     15
+#define PURGE_POSX1     1
+#define PURGE_POSX2     366
+#define PURGE_POSX3     364
+
 // custom pin mapping
 
 #define	DIO86_PIN		PIND4
