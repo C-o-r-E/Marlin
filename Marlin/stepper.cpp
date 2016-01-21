@@ -74,14 +74,26 @@ static unsigned short step_loops_nominal;
 
 volatile long endstops_trigsteps[3] = { 0 };
 volatile long endstops_stepsTotal, endstops_stepsDone;
+//TODO: consider that endstop_hit_bits and *_endstop_bits should be the same size. In some cases they are not!
 static volatile char endstop_hit_bits = 0; // use X_MIN, Y_MIN, Z_MIN and Z_PROBE as BIT value
 
+/*
 #ifndef Z_DUAL_ENDSTOPS
   static byte
 #else
   static uint16_t
 #endif
   old_endstop_bits = 0; // use X_MIN, X_MAX... Z_MAX, Z_PROBE, Z2_MIN, Z2_MAX
+*/
+
+//fblb
+#if defined(USE_Z_AUX) || defined(Z_DUAL_ENDSTOPS)
+  static uint16_t old_endstop_bits = 0;
+#else
+  static uint8_t old_endstop_bits = 0;
+#endif
+ 
+
 
 #ifdef ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED
   bool abort_on_endstop_hit = false;
@@ -470,12 +482,20 @@ ISR(TIMER1_COMPA_vect) {
     // Check endstops
     if (check_endstops) {
       
+      /*
       #ifdef Z_DUAL_ENDSTOPS
         uint16_t
       #else
         byte
       #endif
       current_endstop_bits;
+      */
+
+      #if defined(USE_Z_AUX) || defined(Z_DUAL_ENDSTOPS)
+        static uint16_t current_endstop_bits = 0;
+      #else
+        static uint8_t current_endstop_bits = 0;
+      #endif
 
       #define _ENDSTOP_PIN(AXIS, MINMAX) AXIS ##_## MINMAX ##_PIN
       #define _ENDSTOP_INVERTING(AXIS, MINMAX) AXIS ##_## MINMAX ##_ENDSTOP_INVERTING
@@ -584,6 +604,16 @@ ISR(TIMER1_COMPA_vect) {
             endstop_hit_bits |= BIT(Z_PROBE);
           }
         #endif
+
+        #ifdef USE_Z_AUX
+        UPDATE_ENDSTOP(Z, AUX);
+
+        if (TEST_ENDSTOP(Z_AUX))
+        {
+          endstops_trigsteps[Z_AXIS] = count_position[Z_AXIS];
+          endstop_hit_bits |= BIT(Z_PROBE);
+        }
+        #endif
       }
       else { // z +direction
         #if HAS_Z_MAX
@@ -622,6 +652,17 @@ ISR(TIMER1_COMPA_vect) {
             endstop_hit_bits |= BIT(Z_PROBE);
           }
         #endif
+
+        #ifdef USE_Z_AUX
+        UPDATE_ENDSTOP(Z, AUX);
+
+        if (TEST_ENDSTOP(Z_AUX))
+        {
+          endstops_trigsteps[Z_AXIS] = count_position[Z_AXIS];
+          endstop_hit_bits |= BIT(Z_PROBE);
+        }
+        #endif
+
       }
       old_endstop_bits = current_endstop_bits;
     }
@@ -960,6 +1001,13 @@ void st_init() {
     SET_INPUT(Z_PROBE_PIN);
     #ifdef ENDSTOPPULLUP_ZPROBE
       WRITE(Z_PROBE_PIN,HIGH);
+    #endif
+  #endif
+
+  #ifdef USE_Z_AUX
+    SET_INPUT(Z_AUX_PIN);
+    #if 1
+      WRITE(Z_AUX_PIN,HIGH);
     #endif
   #endif
 

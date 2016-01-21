@@ -1368,6 +1368,10 @@ static void setup_for_endstop_move() {
 
   static void run_z_probe() {
 
+    #ifdef SERVO_SELECTED_TOOL
+      disable_servo_on_all_extruders();
+    #endif
+
     #ifdef DELTA
     
       float start_z = current_position[Z_AXIS];
@@ -4175,6 +4179,10 @@ inline void gcode_M119() {
     SERIAL_PROTOCOLPGM(MSG_Z_PROBE);
     SERIAL_PROTOCOLLN(((READ(Z_PROBE_PIN)^Z_PROBE_ENDSTOP_INVERTING)?MSG_ENDSTOP_HIT:MSG_ENDSTOP_OPEN));
   #endif
+  #if defined(USE_Z_AUX)
+    SERIAL_PROTOCOLPGM("Z_AUX: ");
+    SERIAL_PROTOCOLLN(((READ(Z_AUX_PIN)^Z_AUX_ENDSTOP_INVERTING)?MSG_ENDSTOP_HIT:MSG_ENDSTOP_OPEN));
+  #endif
 }
 
 /**
@@ -5108,6 +5116,42 @@ inline void gcode_M387() {
   feedrate = old_feedrate;
 }
 
+inline void gcode_M388() {
+  plan_bed_level_matrix.set_to_identity();
+  feedrate = homing_feedrate[Z_AXIS];
+
+  //First move to a height where the user can insert the device
+  float z_begin = 100;
+  line_to_z(z_begin);
+  st_synchronize();
+
+  // Move down until the probe (or endstop?) is triggered
+  float zPosition = 32.4;
+  line_to_z(zPosition);
+  st_synchronize();
+
+  // Tell the planner where we ended up - Get this from the stepper handler
+  zPosition = st_get_position_mm(Z_AXIS);
+  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS]);
+
+  // move up the retract distance
+  zPosition += home_bump_mm(Z_AXIS);
+  line_to_z(zPosition);
+  st_synchronize();
+  endstops_hit_on_purpose(); // clear endstop hit flags
+
+  // move back down slowly to find bed
+  set_homing_bump_feedrate(Z_AXIS);
+
+  zPosition -= home_bump_mm(Z_AXIS) * 2;
+  line_to_z(zPosition);
+  st_synchronize();
+  endstops_hit_on_purpose(); // clear endstop hit flags
+
+  // Get the current stepper position after bumping an endstop
+  current_position[Z_AXIS] = st_get_position_mm(Z_AXIS);
+  sync_plan_position();
+}
 
 /**
  * M400: Finish all moves
@@ -6182,6 +6226,9 @@ void process_next_command() {
     case 387:
       gcode_M387();
       break;
+
+    case 388:
+      gcode_M388();
 
       case 400: // M400 finish all moves
         gcode_M400();
