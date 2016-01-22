@@ -607,13 +607,13 @@ ISR(TIMER1_COMPA_vect) {
 
         #ifdef USE_Z_AUX
         UPDATE_ENDSTOP(Z, AUX);
-
         if (TEST_ENDSTOP(Z_AUX))
         {
           endstops_trigsteps[Z_AXIS] = count_position[Z_AXIS];
-          endstop_hit_bits |= BIT(Z_PROBE);
+          endstop_hit_bits |= BIT(Z_AUX);
         }
         #endif
+        
       }
       else { // z +direction
         #if HAS_Z_MAX
@@ -653,16 +653,18 @@ ISR(TIMER1_COMPA_vect) {
           }
         #endif
 
+          //crazy idea 
+          /*
         #ifdef USE_Z_AUX
         UPDATE_ENDSTOP(Z, AUX);
 
         if (TEST_ENDSTOP(Z_AUX))
         {
           endstops_trigsteps[Z_AXIS] = count_position[Z_AXIS];
-          endstop_hit_bits |= BIT(Z_PROBE);
+          endstop_hit_bits |= BIT(Z_AUX);
         }
         #endif
-
+*/
       }
       old_endstop_bits = current_endstop_bits;
     }

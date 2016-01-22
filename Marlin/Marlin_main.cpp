@@ -5117,6 +5117,7 @@ inline void gcode_M387() {
 }
 
 inline void gcode_M388() {
+  setup_for_endstop_move();
   plan_bed_level_matrix.set_to_identity();
   feedrate = homing_feedrate[Z_AXIS];
 
@@ -5133,12 +5134,19 @@ inline void gcode_M388() {
   // Tell the planner where we ended up - Get this from the stepper handler
   zPosition = st_get_position_mm(Z_AXIS);
   plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS]);
+  //endstops_hit_on_purpose(); // clear endstop hit flags
+
+  SERIAL_PROTOCOL("\nArrived at: ");
+  SERIAL_PROTOCOL(zPosition);
 
   // move up the retract distance
   zPosition += home_bump_mm(Z_AXIS);
   line_to_z(zPosition);
   st_synchronize();
   endstops_hit_on_purpose(); // clear endstop hit flags
+
+  SERIAL_PROTOCOL("\nWe should now be at: ");
+  SERIAL_PROTOCOL(zPosition);
 
   // move back down slowly to find bed
   set_homing_bump_feedrate(Z_AXIS);
@@ -5151,6 +5159,12 @@ inline void gcode_M388() {
   // Get the current stepper position after bumping an endstop
   current_position[Z_AXIS] = st_get_position_mm(Z_AXIS);
   sync_plan_position();
+
+  SERIAL_PROTOCOL("\nFinally ended up at: ");
+  SERIAL_PROTOCOL(zPosition);
+  SERIAL_PROTOCOL("\n");
+
+  clean_up_after_endstop_move();
 }
 
 /**
