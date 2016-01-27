@@ -604,7 +604,7 @@ ISR(TIMER1_COMPA_vect) {
             endstop_hit_bits |= BIT(Z_PROBE);
           }
         #endif
-
+          
         #ifdef USE_Z_AUX
         UPDATE_ENDSTOP(Z, AUX);
         if (TEST_ENDSTOP(Z_AUX))
@@ -613,6 +613,7 @@ ISR(TIMER1_COMPA_vect) {
           endstop_hit_bits |= BIT(Z_AUX);
         }
         #endif
+        
         
       }
       else { // z +direction
@@ -652,9 +653,7 @@ ISR(TIMER1_COMPA_vect) {
             endstop_hit_bits |= BIT(Z_PROBE);
           }
         #endif
-
-          //crazy idea 
-          /*
+          
         #ifdef USE_Z_AUX
         UPDATE_ENDSTOP(Z, AUX);
 
@@ -664,7 +663,7 @@ ISR(TIMER1_COMPA_vect) {
           endstop_hit_bits |= BIT(Z_AUX);
         }
         #endif
-*/
+
       }
       old_endstop_bits = current_endstop_bits;
     }

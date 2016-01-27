@@ -1298,6 +1298,8 @@ static void setup_for_endstop_move() {
   enable_endstops(true);
 }
 
+
+
 #ifdef ENABLE_AUTO_BED_LEVELING
 
   #ifdef DELTA
@@ -2030,6 +2032,54 @@ static void homeaxis(AxisEnum axis) {
   } // retract()
 
 #endif // FWRETRACT
+
+#ifdef USE_Z_AUX
+
+void run_z_calibration()
+{
+  setup_for_endstop_move();
+  plan_bed_level_matrix.set_to_identity();
+  feedrate = homing_feedrate[Z_AXIS];
+
+  //First move to a height where the user can insert the device
+  float z_begin = Z_CALIBRAION_START;
+  line_to_z(z_begin);
+  st_synchronize();
+
+  // Move down until the probe (or endstop?) is triggered
+  float zPosition = Z_CALIBRATION_MIN;
+  line_to_z(zPosition);
+  st_synchronize();
+
+  // Tell the planner where we ended up - Get this from the stepper handler
+  zPosition = st_get_position_mm(Z_AXIS);
+  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS]);
+  enable_endstops(false);
+
+  // move up the retract distance
+  zPosition += home_bump_mm(Z_AXIS);
+  line_to_z(zPosition);
+  st_synchronize();
+  enable_endstops(true);
+  endstops_hit_on_purpose(); // clear endstop hit flags
+
+  // move back down slowly to find bed
+  set_homing_bump_feedrate(Z_AXIS);
+
+  zPosition -= home_bump_mm(Z_AXIS) * 2;
+  line_to_z(zPosition);
+  st_synchronize();
+  endstops_hit_on_purpose(); // clear endstop hit flags
+
+  // Get the current stepper position after bumping an endstop
+  zPosition = st_get_position_mm(Z_AXIS);
+  current_position[Z_AXIS] = zPosition;
+  sync_plan_position();
+
+  clean_up_after_endstop_move();
+}
+
+#endif
 
 /**
  *
@@ -5117,54 +5167,15 @@ inline void gcode_M387() {
 }
 
 inline void gcode_M388() {
-  setup_for_endstop_move();
-  plan_bed_level_matrix.set_to_identity();
-  feedrate = homing_feedrate[Z_AXIS];
 
-  //First move to a height where the user can insert the device
-  float z_begin = 100;
-  line_to_z(z_begin);
-  st_synchronize();
+  for (int i = 0; i < 5; ++i)
+  {
+    run_z_calibration();
+    SERIAL_PROTOCOL(" Calibration Z:");
+    SERIAL_PROTOCOL(current_position[Z_AXIS]);
+    do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS] + 5);
+  }
 
-  // Move down until the probe (or endstop?) is triggered
-  float zPosition = 32.4;
-  line_to_z(zPosition);
-  st_synchronize();
-
-  // Tell the planner where we ended up - Get this from the stepper handler
-  zPosition = st_get_position_mm(Z_AXIS);
-  plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS]);
-  //endstops_hit_on_purpose(); // clear endstop hit flags
-
-  SERIAL_PROTOCOL("\nArrived at: ");
-  SERIAL_PROTOCOL(zPosition);
-
-  // move up the retract distance
-  zPosition += home_bump_mm(Z_AXIS);
-  line_to_z(zPosition);
-  st_synchronize();
-  endstops_hit_on_purpose(); // clear endstop hit flags
-
-  SERIAL_PROTOCOL("\nWe should now be at: ");
-  SERIAL_PROTOCOL(zPosition);
-
-  // move back down slowly to find bed
-  set_homing_bump_feedrate(Z_AXIS);
-
-  zPosition -= home_bump_mm(Z_AXIS) * 2;
-  line_to_z(zPosition);
-  st_synchronize();
-  endstops_hit_on_purpose(); // clear endstop hit flags
-
-  // Get the current stepper position after bumping an endstop
-  current_position[Z_AXIS] = st_get_position_mm(Z_AXIS);
-  sync_plan_position();
-
-  SERIAL_PROTOCOL("\nFinally ended up at: ");
-  SERIAL_PROTOCOL(zPosition);
-  SERIAL_PROTOCOL("\n");
-
-  clean_up_after_endstop_move();
 }
 
 /**

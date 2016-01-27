@@ -10,10 +10,11 @@
 
 #define PURGE_LOCATION    {15, 1, 366, 364}
 
-#define PURGE_POSX0     15
-#define PURGE_POSX1     1
-#define PURGE_POSX2     366
-#define PURGE_POSX3     364
+#define USE_Z_AUX
+
+#define Z_CALIBRAION_START 40
+
+#define Z_CALIBRATION_MIN 31.38
 
 // custom pin mapping
 
@@ -84,8 +85,6 @@
 #define LED_PIN            13
 
 //custom stuff
-
-#define USE_Z_AUX
 
 #define Z_AUX_PIN           29
 
