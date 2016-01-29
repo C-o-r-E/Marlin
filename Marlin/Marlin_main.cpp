@@ -261,7 +261,7 @@ float min_pos[3] = { X_MIN_POS, Y_MIN_POS, Z_MIN_POS };
 float max_pos[3] = { X_MAX_POS, Y_MAX_POS, Z_MAX_POS };
 
 uint8_t active_extruder = 0;
-int fanSpeed = 0;
+int fanSpeed = 255;
 bool cancel_heatup = false;
 
 const char errormagic[] PROGMEM = "Error:";
@@ -2080,6 +2080,120 @@ void run_z_calibration()
 }
 
 #endif
+
+void do_purge()
+{
+    float old_feedrate = feedrate;
+  float startx = current_position[X_AXIS];
+  float feedrate_echelon = 20;
+
+  float p_end = 0;
+
+  switch(active_extruder)
+  {
+    case 0:
+    case 1:
+    {
+      p_end = purge_position[active_extruder] + 30;
+    }
+    break;
+
+    case 2:
+    case 3:
+    {
+      p_end = purge_position[active_extruder] - 30;
+    }
+    break;
+
+    default:
+    {
+      SERIAL_PROTOCOL("Error: active extruder out of range...");
+    }
+    break;
+
+  }
+
+  int num_pass = 1;
+
+  if (code_seen('S'))
+  {
+    num_pass = code_value_short();
+  }
+
+  for (int i=0; i<num_pass; i++)
+  {
+    /*
+    First we move above the garbage position
+    */
+
+    feedrate = xy_travel_speed;
+
+    destination[X_AXIS] = purge_position[active_extruder];
+    destination[Y_AXIS] = current_position[Y_AXIS];
+    destination[Z_AXIS] = current_position[Z_AXIS];
+
+    do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
+ 
+    /*
+    Now we need to purge the nozzle
+    */
+
+    /*
+    feedrate = feedrate_echelon;
+
+    for(int i=0; i<10; i++)
+    {
+      destination[E_AXIS] += i;
+      prepare_move();
+      st_synchronize();
+      feedrate += 20;
+    }
+    */
+
+    feedrate = 160;
+
+    for(int i=8; i<10; i++)
+    {
+      destination[E_AXIS] += i;
+      prepare_move();
+      st_synchronize();
+      feedrate += 20;
+    }
+
+    destination[E_AXIS] -= 2;
+    prepare_move();
+    st_synchronize();
+
+    /*
+    Then move back over the print bed
+    */
+
+    feedrate = xy_travel_speed;
+    //feedrate = feedrate_purgemove;
+
+    destination[X_AXIS] = p_end;
+    destination[Y_AXIS] = current_position[Y_AXIS];
+    destination[Z_AXIS] = current_position[Z_AXIS];
+
+    do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
+    //line_to_destination();
+    //st_synchronize();
+
+  }
+
+
+  //move back to where we came from
+
+  destination[X_AXIS] = startx;
+  destination[Y_AXIS] = current_position[Y_AXIS];
+  destination[Z_AXIS] = current_position[Z_AXIS];
+
+  do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
+  //line_to_destination();
+  //st_synchronize();
+
+  feedrate = old_feedrate;
+}
 
 /**
  *
@@ -5053,115 +5167,26 @@ inline void gcode_M385() {
 //purge
 inline void gcode_M386() {
 
-  float old_feedrate = feedrate;
-  float startx = current_position[X_AXIS];
-  float feedrate_echelon = 20;
-
-  float p_end = 0;
-
-  switch(active_extruder)
-  {
-    case 0:
-    case 1:
-    {
-      p_end = purge_position[active_extruder] + 30;
-    }
-    break;
-
-    case 2:
-    case 3:
-    {
-      p_end = purge_position[active_extruder] - 30;
-    }
-    break;
-
-    default:
-    {
-      SERIAL_PROTOCOL("Error: active extruder out of range...");
-    }
-    break;
-
-  }
-
-  int num_pass = 1;
-
-  if (code_seen('S'))
-  {
-    num_pass = code_value_short();
-  }
-
-  for (int i=0; i<num_pass; i++)
-  {
-    /*
-    First we move above the garbage position
-    */
-
-    feedrate = xy_travel_speed;
-
-    destination[X_AXIS] = purge_position[active_extruder];
-    destination[Y_AXIS] = current_position[Y_AXIS];
-    destination[Z_AXIS] = current_position[Z_AXIS];
-
-    do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
- 
-    /*
-    Now we need to purge the nozzle
-    */
-
-    feedrate = feedrate_echelon;
-
-    for(int i=0; i<10; i++)
-    {
-      destination[E_AXIS] += i;
-      prepare_move();
-      st_synchronize();
-      feedrate += 20;
-    }
-
-    /*
-    Then move back over the print bed
-    */
-
-    feedrate = xy_travel_speed;
-    //feedrate = feedrate_purgemove;
-
-    destination[X_AXIS] = p_end;
-    destination[Y_AXIS] = current_position[Y_AXIS];
-    destination[Z_AXIS] = current_position[Z_AXIS];
-
-    do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
-    //line_to_destination();
-    //st_synchronize();
-
-  }
-
-
-  //move back to where we came from
-
-  destination[X_AXIS] = startx;
-  destination[Y_AXIS] = current_position[Y_AXIS];
-  destination[Z_AXIS] = current_position[Z_AXIS];
-
-  do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
-  //line_to_destination();
-  //st_synchronize();
-
-  feedrate = old_feedrate;
+  do_purge();
 
 }
 
 inline void gcode_M387() {
   float old_feedrate = feedrate;
 
-  feedrate = 20;
+  feedrate = 160;
 
-  for(int i=0; i<10; i++)
+  for(int i=8; i<10; i++)
   {
     destination[E_AXIS] += i;
     prepare_move();
     st_synchronize();
     feedrate += 20;
   }
+
+  destination[E_AXIS] -= 2;
+  prepare_move();
+  st_synchronize();
 
   feedrate = old_feedrate;
 }
