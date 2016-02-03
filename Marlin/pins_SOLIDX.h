@@ -12,9 +12,10 @@
 
 #define USE_Z_AUX
 
-#define Z_CALIBRAION_START 40
+#define Z_CALIBRAION_START      40
 
-#define Z_CALIBRATION_MIN 31.38
+#define Z_CALIBRATION_MIN       30.00
+#define Z_CALIBRATION_TARGET    32.50
 
 // custom pin mapping
 

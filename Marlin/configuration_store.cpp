@@ -33,6 +33,7 @@
  *  M205 Z    max_z_jerk
  *  M205 E    max_e_jerk
  *  M206 XYZ  home_offset (x3)
+ *  M218 XYZ  extruder_offset (x3)
  *
  * Mesh bed leveling:
  *  M420 S    active
@@ -150,6 +151,7 @@ void Config_StoreSettings()  {
   EEPROM_WRITE_VAR(i, max_z_jerk);
   EEPROM_WRITE_VAR(i, max_e_jerk);
   EEPROM_WRITE_VAR(i, home_offset);
+  EEPROM_WRITE_VAR(i, extruder_offset);
 
   uint8_t mesh_num_x = 3;
   uint8_t mesh_num_y = 3;
@@ -297,6 +299,12 @@ void Config_RetrieveSettings() {
   char ver[4] = EEPROM_VERSION;
   EEPROM_READ_VAR(i, stored_ver); //read stored version
   //  SERIAL_ECHOLN("Version: [" << ver << "] Stored version: [" << stored_ver << "]");
+    SERIAL_ECHO("Version: ");
+    SERIAL_ECHOLN(ver);
+    SERIAL_ECHO("Stored: ");
+    SERIAL_ECHOLN(stored_ver);
+    
+
 
   if (strncmp(ver, stored_ver, 3) != 0) {
     Config_ResetDefault();
@@ -321,7 +329,7 @@ void Config_RetrieveSettings() {
     EEPROM_READ_VAR(i, max_xy_jerk);
     EEPROM_READ_VAR(i, max_z_jerk);
     EEPROM_READ_VAR(i, max_e_jerk);
-    EEPROM_READ_VAR(i, home_offset);
+    EEPROM_READ_VAR(i, extruder_offset);
 
     uint8_t dummy_uint8 = 0, mesh_num_x = 0, mesh_num_y = 0;
     EEPROM_READ_VAR(i, dummy_uint8);
@@ -493,6 +501,10 @@ void Config_ResetDefault() {
   max_z_jerk = DEFAULT_ZJERK;
   max_e_jerk = DEFAULT_EJERK;
   home_offset[X_AXIS] = home_offset[Y_AXIS] = home_offset[Z_AXIS] = 0;
+
+  float init_offsets[NUM_AXIS][EXTRUDERS] = {EXTRUDER_OFFSET_X, EXTRUDER_OFFSET_Y, EXTRUDER_OFFSET_Z};
+
+  memcpy(&extruder_offset, &init_offsets, sizeof(init_offsets));
 
   #ifdef MESH_BED_LEVELING
     mbl.active = 0;
@@ -670,6 +682,9 @@ void Config_PrintSettings(bool forReplay) {
   SERIAL_ECHOPAIR(" Y", home_offset[Y_AXIS]);
   SERIAL_ECHOPAIR(" Z", home_offset[Z_AXIS]);
   SERIAL_EOL;
+
+  SERIAL_ECHOPAIR(" M218 Z(0): ", extruder_offset[Z_AXIS][0]);
+  SERIAL_EOL;  
 
   #ifdef MESH_BED_LEVELING
     if (!forReplay) {

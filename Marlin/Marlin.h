@@ -270,6 +270,7 @@ extern float filament_size[EXTRUDERS]; // cross-sectional area of filament (in m
 extern float volumetric_multiplier[EXTRUDERS]; // reciprocal of cross-sectional area of filament (in square millimeters), stored this way to reduce computational burden in planner
 extern float current_position[NUM_AXIS];
 extern float home_offset[3];
+extern float extruder_offset[3][EXTRUDERS];
 
 #ifdef DELTA
   extern float endstop_adj[3];

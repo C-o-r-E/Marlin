@@ -305,10 +305,10 @@ bool target_direction;
   #ifdef DUAL_X_CARRIAGE
     #define EXTRUDER_OFFSET_Z { 0 }
   #endif
-  float extruder_offset[][EXTRUDERS] = {
+  float extruder_offset[3][EXTRUDERS] = {
     EXTRUDER_OFFSET_X,
     EXTRUDER_OFFSET_Y,
-    EXTRUDER_OFFSET_
+    EXTRUDER_OFFSET_Z
   };
 #endif
 
@@ -1897,8 +1897,8 @@ static void homeaxis(AxisEnum axis) {
      {
 	  enable_endstops(false);
 	  sync_plan_position();
-          feedrate = homing_feedrate[axis];
-	  destination[axis] = 3.2;
+    feedrate = homing_feedrate[axis];
+	  destination[axis] = extruder_offset[axis][active_extruder];//3.2;
 	  line_to_destination();
 	  st_synchronize();
 	  enable_endstops(true); // Enable endstops for next homing move
@@ -4610,10 +4610,8 @@ inline void gcode_M206() {
 
     if (code_seen('X')) extruder_offset[X_AXIS][target_extruder] = code_value();
     if (code_seen('Y')) extruder_offset[Y_AXIS][target_extruder] = code_value();
-
-    #ifdef DUAL_X_CARRIAGE
-      if (code_seen('Z')) extruder_offset[Z_AXIS][target_extruder] = code_value();
-    #endif
+    if (code_seen('Z')) extruder_offset[Z_AXIS][target_extruder] = code_value();
+  
 
     SERIAL_ECHO_START;
     SERIAL_ECHOPGM(MSG_HOTEND_OFFSET);
@@ -4622,10 +4620,8 @@ inline void gcode_M206() {
       SERIAL_ECHO(extruder_offset[X_AXIS][e]);
       SERIAL_CHAR(',');
       SERIAL_ECHO(extruder_offset[Y_AXIS][e]);
-      #ifdef DUAL_X_CARRIAGE
-        SERIAL_CHAR(',');
-        SERIAL_ECHO(extruder_offset[Z_AXIS][e]);
-      #endif
+      SERIAL_CHAR(',');
+      SERIAL_ECHO(extruder_offset[Z_AXIS][e]);
     }
     SERIAL_EOL;
   }
@@ -5194,13 +5190,34 @@ inline void gcode_M387() {
 
 inline void gcode_M388() {
 
-  for (int i = 0; i < 5; ++i)
+  uint8_t i = 5;
+
+  float zCal[i];
+  float res = 0;
+
+  for (i = 0; i < 5; ++i)
   {
     run_z_calibration();
+    res = res + current_position[Z_AXIS];
     SERIAL_PROTOCOL(" Calibration Z:");
     SERIAL_PROTOCOL(current_position[Z_AXIS]);
     do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS] + 5);
   }
+
+  res /= i;
+
+  SERIAL_PROTOCOL(" Avg:");
+  SERIAL_PROTOCOL(res);
+
+  res -= Z_CALIBRATION_TARGET;
+
+  SERIAL_PROTOCOL("Changing Z offset from ");
+  SERIAL_PROTOCOL(extruder_offset[Z_AXIS][active_extruder]);  
+
+  extruder_offset[Z_AXIS][active_extruder] += res;
+
+  SERIAL_PROTOCOL(" to ");
+  SERIAL_PROTOCOL(extruder_offset[Z_AXIS][active_extruder]);  
 
 }
 
@@ -5778,8 +5795,8 @@ inline void gcode_T(uint8_t tmp_extruder) {
             delayed_move_time = 0;
           }
         #else // !DUAL_X_CARRIAGE
-          // Offset extruder (only by XY)
-          for (int i=X_AXIS; i<=Y_AXIS; i++)
+          // Offset extruder 
+          for (int i=X_AXIS; i<=Z_AXIS; i++)
             current_position[i] += extruder_offset[i][tmp_extruder] - extruder_offset[i][active_extruder];
           // Set the new active extruder and position
           active_extruder = tmp_extruder;
