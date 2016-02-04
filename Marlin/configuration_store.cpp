@@ -699,7 +699,20 @@ void Config_PrintSettings(bool forReplay) {
   SERIAL_ECHOPAIR(" Z", home_offset[Z_AXIS]);
   SERIAL_EOL;
 
-  SERIAL_ECHOPAIR(" M218 Z(0): ", extruder_offset[Z_AXIS][0]);
+  //offsets XYZ
+  SERIAL_ECHOLN("M218 offsets: {");
+
+  for(int ax=0; ax<NUM_AXIS -1; ++ax)
+  {
+      SERIAL_ECHO("    { ");
+      for(int bx=0; bx<EXTRUDERS; ++bx)
+      {
+        SERIAL_ECHO(extruder_offset[ax][bx]);
+        SERIAL_ECHO(" ");
+      }
+      SERIAL_ECHOLN("}");
+  }
+  SERIAL_ECHO("}");
   SERIAL_EOL;  
 
   #ifdef MESH_BED_LEVELING

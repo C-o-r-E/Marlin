@@ -2082,9 +2082,110 @@ void run_z_calibration()
 
 #endif
 
+/*
+  This function will move the active extruder to 
+  its corresponding garbage position.
+
+  current_postion[] will be updated
+
+*/
+void move_to_active_garbage()
+{
+    destination[X_AXIS] = purge_position[active_extruder];
+    destination[Y_AXIS] = current_position[Y_AXIS];
+    destination[Z_AXIS] = current_position[Z_AXIS];
+
+    do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
+}
+
+/*
+  This function will move the active extruder across 
+  the wiper and back to its starting position. The 
+  process will repeat nWipes times.
+
+*/
+void do_wipe(uint8_t nWipes, uint8_t purging)
+{
+
+  float start_pos = current_position[X_AXIS];
+  float wipe_pos = 0;
+
+  //figure out what position to move to based on active extruder
+  switch(active_extruder)
+  {
+    case 0:
+    case 1:
+    {
+      wipe_pos = purge_position[active_extruder] + 30;
+    }
+    break;
+
+    case 2:
+    case 3:
+    {
+      wipe_pos = purge_position[active_extruder] - 30;
+    }
+    break;
+
+    default:
+    {
+      SERIAL_PROTOCOL("Error: active extruder out of range...");
+    }
+    break;
+  }
+
+    //do the wipes
+    for(int i=0; i<nWipes; ++i)
+    {
+
+      destination[X_AXIS] = wipe_pos;
+      destination[Y_AXIS] = current_position[Y_AXIS];
+      destination[Z_AXIS] = current_position[Z_AXIS];
+
+      do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
+
+      disable_servo_on_all_extruders();
+
+      move_to_active_garbage();
+
+      enable_servo_on_active_extruder();
+
+      if(purging)
+      {
+        new_purge();
+      }
+    }
+
+    //move back to where we started
+    destination[X_AXIS] = start_pos;
+    destination[Y_AXIS] = current_position[Y_AXIS];
+    destination[Z_AXIS] = current_position[Z_AXIS];
+
+    do_blocking_move_to(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS]); // also updates current_position
+
+
+}
+
+void new_purge()
+{
+  feedrate = 160;
+
+  for(int i=8; i<10; i++)
+  {
+    destination[E_AXIS] += i;
+    prepare_move();
+    st_synchronize();
+    feedrate += 20;
+  }
+
+  destination[E_AXIS] -= 3;
+  prepare_move();
+  st_synchronize();
+}
+
 void do_purge()
 {
-    float old_feedrate = feedrate;
+  float old_feedrate = feedrate;
   float startx = current_position[X_AXIS];
   float feedrate_echelon = 20;
 
@@ -5221,6 +5322,19 @@ inline void gcode_M388() {
 
 }
 
+inline void gcode_M389()
+{
+  uint8_t passes = 1;
+
+  if(code_seen('S'))
+  {
+    passes = code_value();
+  }
+
+  do_wipe(passes);
+
+}
+
 /**
  * M400: Finish all moves
  */
@@ -6297,6 +6411,11 @@ void process_next_command() {
 
     case 388:
       gcode_M388();
+    break;
+
+    case 389:
+      gcode_M389();
+    break;    
 
       case 400: // M400 finish all moves
         gcode_M400();
