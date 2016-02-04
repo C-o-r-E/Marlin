@@ -102,6 +102,14 @@
 
 void _EEPROM_writeData(int &pos, uint8_t* value, uint8_t size) {
   uint8_t c;
+
+/*
+  SERIAL_ECHO("Write [");
+  SERIAL_ECHO((int)size);
+  SERIAL_ECHO("] bytes at position [");
+  SERIAL_ECHO(pos);
+  SERIAL_ECHOLN("]");
+*/
   while(size--) {
     eeprom_write_byte((unsigned char*)pos, *value);
     c = eeprom_read_byte((unsigned char*)pos);
@@ -114,6 +122,13 @@ void _EEPROM_writeData(int &pos, uint8_t* value, uint8_t size) {
   };
 }
 void _EEPROM_readData(int &pos, uint8_t* value, uint8_t size) {
+/*
+  SERIAL_ECHO("Read [");
+  SERIAL_ECHO((int)size);
+  SERIAL_ECHO("] bytes at position [");
+  SERIAL_ECHO(pos);
+  SERIAL_ECHOLN("]");
+*/
   do {
     *value = eeprom_read_byte((unsigned char*)pos);
     pos++;
@@ -329,6 +344,7 @@ void Config_RetrieveSettings() {
     EEPROM_READ_VAR(i, max_xy_jerk);
     EEPROM_READ_VAR(i, max_z_jerk);
     EEPROM_READ_VAR(i, max_e_jerk);
+    EEPROM_READ_VAR(i, home_offset);
     EEPROM_READ_VAR(i, extruder_offset);
 
     uint8_t dummy_uint8 = 0, mesh_num_x = 0, mesh_num_y = 0;
