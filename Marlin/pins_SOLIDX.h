@@ -87,6 +87,11 @@
 
 //custom stuff
 
+#define FIL_SRC_0           16
+#define FIL_SRC_0           23
+#define FIL_SRC_0           27
+#define FIL_SRC_0           31
+
 #define Z_AUX_PIN           29
 
 #define Z_PROBE_PIN         35

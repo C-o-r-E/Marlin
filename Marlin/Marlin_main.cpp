@@ -2166,6 +2166,7 @@ void do_wipe(uint8_t nWipes, uint8_t purging)
 
 }
 
+
 void new_purge()
 {
   feedrate = 160;
@@ -5325,13 +5326,19 @@ inline void gcode_M388() {
 inline void gcode_M389()
 {
   uint8_t passes = 1;
+  uint8_t purges = 0;
 
   if(code_seen('S'))
   {
     passes = code_value();
   }
 
-  do_wipe(passes);
+  if(code_seen('P'))
+  {
+    purges = code_value();
+  }
+
+  do_wipe(passes, purges);
 
 }
 
