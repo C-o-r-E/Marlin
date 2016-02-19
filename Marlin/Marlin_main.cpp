@@ -5217,6 +5217,12 @@ inline void gcode_M383() {
   SERIAL_EOL;
 }
 
+/*
+  This function is for testing the articulation of the nozzles
+
+  It will move all servos in to the "up" position
+*/
+
 inline void gcode_M384() {
 
   SERIAL_PROTOCOL(" Relaxed Servo Position");
@@ -5238,6 +5244,12 @@ inline void gcode_M384() {
   OCR4CH = 0x07;
   OCR4CL = 0xD0;
 }
+
+/*
+  This function is for testing the articulation of the nozzles
+
+  It will move all servos in to the "down" position
+*/
 
 inline void gcode_M385() {
   //analogWrite(SRV0_PIN, 0);
@@ -5263,12 +5275,32 @@ inline void gcode_M385() {
 }
 
 
-//purge
+/*
+
+  Purge
+
+  This Function is depricated
+
+  TODO: remove this
+
+*/
+
 inline void gcode_M386() {
 
   do_purge();
 
 }
+
+/*
+
+  in place purge
+
+  This is a testing function to allow for a stepped 
+  extrusion
+
+  As of Feb 2016, it seems this may not be needed.
+
+*/
 
 inline void gcode_M387() {
   float old_feedrate = feedrate;
@@ -5289,6 +5321,21 @@ inline void gcode_M387() {
 
   feedrate = old_feedrate;
 }
+
+/*
+  Nozzle height calibration.
+
+  This function os for calibrating the active nozzle's Z offset
+
+  The head will "move down" until it hits the Z_AUX probe or it reaches
+  Z_CALIBRATION_MIN. It will return to the original Z postion and repeat 
+  the sequence several times. The average is then taken and applied.
+
+  It is suggested that the next operation should be homing the Z axis.
+
+  For the new Z offset to be stored beyond reset, the M500 gcode should
+  be issued to save settings to EEPROM
+*/
 
 inline void gcode_M388() {
 
@@ -5323,6 +5370,21 @@ inline void gcode_M388() {
 
 }
 
+/*
+  This function is for cleaning the active extruder.
+
+  The head will move to the corresponding garbage position
+  followed by a series of wipes and purges. Once complete,
+  the head will move back to its startring position. 
+
+  The S parameter defines the number of wipes
+
+  The P parameter defines the number of purges
+
+  By default a single wipe is performed.
+
+*/
+
 inline void gcode_M389()
 {
   uint8_t passes = 1;
@@ -5340,6 +5402,18 @@ inline void gcode_M389()
 
   do_wipe(passes, purges);
 
+}
+
+// Unload Filament
+inline void gcode_M390()
+{
+
+}
+
+// Load Filament
+inline void gcode_M391()
+{
+  
 }
 
 /**
