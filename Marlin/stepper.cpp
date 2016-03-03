@@ -1012,6 +1012,17 @@ void st_init() {
     #endif
   #endif
 
+  SET_INPUT(FIL_SRC_0);
+  SET_INPUT(FIL_SRC_1);
+  SET_INPUT(FIL_SRC_2);
+  SET_INPUT(FIL_SRC_3);
+
+  WRITE(FIL_SRC_0, HIGH);
+  WRITE(FIL_SRC_1, HIGH);
+  WRITE(FIL_SRC_2, HIGH);
+  WRITE(FIL_SRC_3, HIGH);
+
+
   #define _STEP_INIT(AXIS) AXIS ##_STEP_INIT
   #define _WRITE_STEP(AXIS, HIGHLOW) AXIS ##_STEP_WRITE(HIGHLOW)
   #define _DISABLE(axis) disable_## axis()

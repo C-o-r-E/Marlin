@@ -4450,6 +4450,18 @@ inline void gcode_M119() {
     SERIAL_PROTOCOLPGM("Z_AUX: ");
     SERIAL_PROTOCOLLN(((READ(Z_AUX_PIN)^Z_AUX_ENDSTOP_INVERTING)?MSG_ENDSTOP_HIT:MSG_ENDSTOP_OPEN));
   #endif
+
+  SERIAL_PROTOCOLPGM("FIL0: ");
+  SERIAL_PROTOCOLLN(((READ(FIL_SRC_0))?MSG_ENDSTOP_HIT:MSG_ENDSTOP_OPEN));
+
+  SERIAL_PROTOCOLPGM("FIL1: ");
+  SERIAL_PROTOCOLLN(((READ(FIL_SRC_1))?MSG_ENDSTOP_HIT:MSG_ENDSTOP_OPEN));
+
+  SERIAL_PROTOCOLPGM("FIL2: ");
+  SERIAL_PROTOCOLLN(((READ(FIL_SRC_2))?MSG_ENDSTOP_HIT:MSG_ENDSTOP_OPEN));
+
+  SERIAL_PROTOCOLPGM("FIL3: ");
+  SERIAL_PROTOCOLLN(((READ(FIL_SRC_3))?MSG_ENDSTOP_HIT:MSG_ENDSTOP_OPEN));
 }
 
 /**
@@ -5207,7 +5219,7 @@ inline void gcode_M382() {
 #endif //PRESSURE_SENSOR
 
 /**
- * M383: TODO: give this a name
+ * M383: Toggle Servo enable
  */
 inline void gcode_M383() {
   SERIAL_PROTOCOL(" Toggle Servo Enable");
@@ -5407,13 +5419,27 @@ inline void gcode_M389()
 // Unload Filament
 inline void gcode_M390()
 {
+  float oldfd = feedrate;
 
+  feedrate = 500;
+  destination[E_AXIS] -= 1200;
+  prepare_move();
+  st_synchronize();
+
+  feedrate = oldfd;
 }
 
 // Load Filament
 inline void gcode_M391()
 {
-  
+  float oldfd = feedrate;
+
+  feedrate = 500;
+  destination[E_AXIS] += 1050;
+  prepare_move();
+  st_synchronize();
+
+  feedrate = oldfd;
 }
 
 /**
@@ -6497,6 +6523,14 @@ void process_next_command() {
     case 389:
       gcode_M389();
     break;    
+
+    case 390:
+      gcode_M390();
+    break;
+
+    case 391:
+      gcode_M391();
+    break;
 
       case 400: // M400 finish all moves
         gcode_M400();
